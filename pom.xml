@@ -41,7 +41,7 @@
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
 
-        <!-- PostgreSQL Driver (for Render) -->
+        <!-- PostgreSQL Driver for Render -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
