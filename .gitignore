@@ -1,0 +1,97 @@
+# Compiled files
+target/
+out/
+bin/
+build/
+*.class
+*.jar
+*.war
+*.ear
+
+# IDE files - IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+.idea_modules/
+
+# IDE files - Eclipse
+.classpath
+.project
+.settings/
+.metadata/
+.apt_generated
+.factorypath
+.springBeans
+.sts4-cache
+
+# IDE files - VS Code
+.vscode/
+*.code-workspace
+
+# IDE files - NetBeans
+nbproject/
+nb-configuration.xml
+nbbuild/
+dist/
+nbdist/
+.gradle/
+build/
+
+# Log files
+*.log
+logs/
+*.log.gz
+
+# OS files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+*.swp
+*.swo
+
+# Maven wrapper (keep these)
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# Maven
+.mvn/
+mvnw
+mvnw.cmd
+.m2/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+*.h2.db
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Test files
+test-output/
+target/surefire-reports/
+target/failsafe-reports/
+
+# Temporary files
+*.tmp
+*.temp
+*.cache
+*.lock
+*~
+
+# Backup files
+*.backup
+*.bak
+*.orig
+*.rej
