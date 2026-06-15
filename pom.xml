@@ -41,8 +41,7 @@
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
 
-        <!-- MySQL Driver -->
-        <!-- Add this -->
+        <!-- PostgreSQL Driver (for Render) -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
@@ -70,11 +69,5 @@
             </plugin>
         </plugins>
     </build>
-
-    <dependency>
-        <groupId>org.postgresql</groupId>
-        <artifactId>postgresql</artifactId>
-        <version>42.7.3</version>
-    </dependency>v
 
 </project>
