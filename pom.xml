@@ -42,10 +42,11 @@
         </dependency>
 
         <!-- MySQL Driver -->
+        <!-- Add this -->
         <dependency>
-            <groupId>com.mysql</groupId>
-            <artifactId>mysql-connector-j</artifactId>
-            <version>8.0.33</version>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.3</version>
         </dependency>
 
         <!-- Spring Session for user sessions -->
@@ -69,5 +70,11 @@
             </plugin>
         </plugins>
     </build>
+
+    <dependency>
+        <groupId>org.postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>42.7.3</version>
+    </dependency>v
 
 </project>
