@@ -48,17 +48,17 @@
                     <tbody>
                     <tr th:each="booking : ${bookings}">
                         <td th:text="${booking.id}">1</td>
-                        <td th:text="${booking.user.fullName}">John Doe</td>
-                        <td th:text="${booking.service.name}">Haircut</td>
-                        <td th:text="${booking.staff.name}">John Smith</td>
+                        <td th:text="${booking.user != null ? booking.user.fullName : 'Unknown'}">John Doe</td>
+                        <td th:text="${booking.service != null ? booking.service.serviceName : 'N/A'}">Haircut</td>
+                        <td th:text="${booking.staff != null ? booking.staff.staffName : 'TBD'}">John Smith</td>
                         <td th:text="${booking.date}">2024-01-15</td>
                         <td th:text="${booking.time}">10:00</td>
                         <td>
-                                    <span class="badge"
-                                          th:class="${booking.status == 'pending' ? 'bg-warning' :
-                                                    booking.status == 'confirmed' ? 'bg-info' :
-                                                    booking.status == 'completed' ? 'bg-success' : 'bg-danger'}"
-                                          th:text="${booking.status}">pending</span>
+                            <span class="badge"
+                                  th:class="${booking.status == 'pending' ? 'bg-warning' :
+                                            booking.status == 'confirmed' ? 'bg-info' :
+                                            booking.status == 'completed' ? 'bg-success' : 'bg-danger'}"
+                                  th:text="${booking.status}">pending</span>
                         </td>
                         <td>
                             <form action="/admin/booking/update" method="post" class="d-inline">
@@ -72,7 +72,7 @@
                             </form>
                         </td>
                     </tr>
-                    <tr th:if="${bookings.empty}">
+                    <tr th:if="${bookings == null or bookings.isEmpty()}">
                         <td colspan="8" class="text-center">No bookings found</td>
                     </tr>
                     </tbody>
