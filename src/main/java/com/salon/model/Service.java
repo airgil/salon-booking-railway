@@ -17,10 +17,19 @@ public class Service {
     private String description;
     private Integer duration;
     private BigDecimal price;
-    private Boolean active;
+    private Boolean active = true;  // Default to true
 
-    // Constructors
+    // Default constructor (required for JPA)
     public Service() {}
+
+    // Constructor with fields
+    public Service(String serviceName, String description, Integer duration, BigDecimal price) {
+        this.serviceName = serviceName;
+        this.description = description;
+        this.duration = duration;
+        this.price = price;
+        this.active = true;
+    }
 
     // Getters and Setters
     public Long getId() { return id; }
