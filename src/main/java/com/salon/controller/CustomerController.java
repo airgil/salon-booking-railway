@@ -7,7 +7,6 @@ import com.salon.model.User;
 import com.salon.repository.ServiceRepository;
 import com.salon.repository.StaffRepository;
 import com.salon.service.BookingService;
-import com.salon.service.EmailService;  // ← ADD THIS IMPORT
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -31,9 +30,6 @@ public class CustomerController {
     @Autowired
     private StaffRepository staffRepository;
 
-    @Autowired
-    private EmailService emailService;  // ← ADD THIS
-
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session, Model model) {
         User user = (User) session.getAttribute("user");
@@ -48,7 +44,7 @@ public class CustomerController {
     @GetMapping("/book")
     public String bookPage(Model model) {
         List<Service> services = serviceRepository.findByActiveTrue();
-        List<Staff> staff = staffRepository.findByAvailableTrue();
+        List<Staff> staff = staffRepository.findByIsAvailableTrue();
         model.addAttribute("services", services);
         model.addAttribute("staff", staff);
         return "customer/book";
@@ -75,7 +71,7 @@ public class CustomerController {
         if (!bookingService.isTimeSlotAvailable(staffId, bookingDate, bookingTime)) {
             model.addAttribute("error", "Time slot not available");
             model.addAttribute("services", serviceRepository.findByActiveTrue());
-            model.addAttribute("staff", staffRepository.findByAvailableTrue());
+            model.addAttribute("staff", staffRepository.findByIsAvailableTrue());
             return "customer/book";
         }
 
@@ -85,18 +81,8 @@ public class CustomerController {
         booking.setStaff(staffRepository.findById(staffId).orElse(null));
         booking.setDate(bookingDate);
         booking.setTime(bookingTime);
-        booking.setStatus("confirmed");
 
-        Booking savedBooking = bookingService.createBooking(booking);
-
-        // Send email confirmation
-        try {
-            emailService.sendBookingConfirmation(savedBooking, user);
-            System.out.println("✅ Email sent to: " + user.getEmail());
-        } catch (Exception e) {
-            System.err.println("❌ Email failed: " + e.getMessage());
-        }
-
+        bookingService.createBooking(booking);
         return "redirect:/customer/dashboard";
     }
 
@@ -106,36 +92,7 @@ public class CustomerController {
         return "redirect:/customer/dashboard";
     }
 
-    // Test email endpoint
-    @GetMapping("/test-email")
-    @ResponseBody
-    public String testEmail(HttpSession session) {
-        User user = (User) session.getAttribute("user");
-        if (user == null) {
-            return "❌ Please login first at /login";
-        }
 
-        System.out.println("========================================");
-        System.out.println("📧 TEST EMAIL REQUEST");
-        System.out.println("  User: " + user.getFullName());
-        System.out.println("  Email: " + user.getEmail());
-        System.out.println("========================================");
 
-        try {
-            Booking testBooking = new Booking();
-            testBooking.setId(999L);
-            testBooking.setDate(LocalDate.now());
-            testBooking.setTime(LocalTime.now());
-            testBooking.setStatus("test");
-            testBooking.setUser(user);
 
-            emailService.sendBookingConfirmation(testBooking, user);
-            return "✅ Test email sent to: " + user.getEmail() + ". Check your inbox and spam folder!";
-
-        } catch (Exception e) {
-            System.err.println("❌ Test email error: " + e.getMessage());
-            e.printStackTrace();
-            return "❌ Email failed: " + e.getMessage();
-        }
-    }
 }
