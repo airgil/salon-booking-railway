@@ -2,11 +2,16 @@ package com.salon.controller;
 
 import com.salon.model.User;
 import com.salon.service.UserService;
+import com.salon.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpSession;
 
@@ -15,6 +20,40 @@ public class AuthController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private EmailService emailService;
+
+    @Autowired(required = false)
+    private JavaMailSender mailSender;
+
+    // ===== GET MAPPINGS =====
+
+    @GetMapping("/login")
+    public String loginPage(@RequestParam(value = "error", required = false) String error,
+                            @RequestParam(value = "success", required = false) String success,
+                            Model model) {
+        if (error != null) {
+            model.addAttribute("error", "Invalid username or password");
+        }
+        if (success != null) {
+            model.addAttribute("success", "Registration successful! Please login.");
+        }
+        return "login";
+    }
+
+    @GetMapping("/register")
+    public String registerPage() {
+        return "register";
+    }
+
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/login?logout=true";
+    }
+
+    // ===== POST MAPPINGS =====
 
     @PostMapping("/login")
     public String doLogin(@RequestParam String username,
@@ -40,19 +79,66 @@ public class AuthController {
                              @RequestParam String password,
                              @RequestParam String fullName,
                              @RequestParam String email,
+                             @RequestParam(required = false) String phone,
                              Model model) {
+        // Check if username already exists
+        if (userService.findByUsername(username).isPresent()) {
+            model.addAttribute("error", "Username already exists");
+            return "register";
+        }
+
+        // Check if email already exists
+        if (userService.findByEmail(email).isPresent()) {
+            model.addAttribute("error", "Email already registered");
+            return "register";
+        }
+
         User user = new User();
         user.setUsername(username);
         user.setPassword(password);
         user.setFullName(fullName);
         user.setEmail(email);
+        user.setPhone(phone);
+        user.setRole("customer");
 
         if (userService.register(user)) {
-            model.addAttribute("success", "Registration successful! Please login.");
-            return "login";
+            return "redirect:/login?success=true";
         }
 
-        model.addAttribute("error", "Username already exists");
+        model.addAttribute("error", "Registration failed. Please try again.");
         return "register";
+    }
+
+    // ===== EMAIL TEST ENDPOINTS =====
+
+    @GetMapping("/email-status")
+    @ResponseBody
+    public String emailStatus() {
+        return "Email Service Status:\n" +
+                "MailSender: " + (mailSender != null ? "✅ Available" : "❌ NULL") + "\n" +
+                "EmailService: " + (emailService != null ? "✅ Available" : "❌ NULL");
+    }
+
+    @GetMapping("/test-email-simple")
+    @ResponseBody
+    public String testEmailSimple(@RequestParam String email) {
+        if (mailSender == null) {
+            return "❌ MailSender is NULL. Check spring-boot-starter-mail dependency.";
+        }
+
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom("airgilstudio@gmail.com");
+            message.setTo(email);
+            message.setSubject("Test Email from Salon Booking");
+            message.setText("This is a test email from your Salon Booking System!\n\n" +
+                    "If you received this, email is working correctly.\n\n" +
+                    "Best regards,\n" +
+                    "Salon Booking System");
+            mailSender.send(message);
+            return "✅ Test email sent to: " + email + ". Check your inbox and spam folder!";
+        } catch (Exception e) {
+            return "❌ Email failed: " + e.getMessage();
+        }
     }
 }
