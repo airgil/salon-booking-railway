@@ -1,7 +1,6 @@
 package com.salon.model;
 
 import javax.persistence.*;
-import java.util.List;
 
 @Entity
 @Table(name = "staff")
@@ -28,7 +27,7 @@ public class Staff {
         this.isAvailable = true;
     }
 
-    // Getters and Setters
+    // Getters and setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -40,4 +39,13 @@ public class Staff {
 
     public Boolean getIsAvailable() { return isAvailable; }
     public void setIsAvailable(Boolean isAvailable) { this.isAvailable = isAvailable; }
+
+    // Convenience methods
+    public Boolean getAvailable() {
+        return isAvailable;
+    }
+
+    public void setAvailable(Boolean available) {
+        this.isAvailable = available;
+    }
 }

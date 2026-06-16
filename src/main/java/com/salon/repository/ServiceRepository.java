@@ -7,5 +7,10 @@ import java.util.List;
 
 @Repository
 public interface ServiceRepository extends JpaRepository<Service, Long> {
+
+    // Find active services
     List<Service> findByActiveTrue();
+
+    // Find services by active status
+    List<Service> findByActive(Boolean active);
 }

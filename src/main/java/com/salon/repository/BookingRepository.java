@@ -24,6 +24,10 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByStaffAndDateAndTime(Staff staff, LocalDate date, LocalTime time);
     List<Booking> findByStatus(String status);
 
+    // For reminders - get confirmed bookings for a specific date
+    @Query("SELECT b FROM Booking b WHERE b.date = :date AND b.status = 'confirmed'")
+    List<Booking> findConfirmedBookingsByDate(@Param("date") LocalDate date);
+
     // Find all bookings ordered by date and time
     @Query("SELECT b FROM Booking b ORDER BY b.date DESC, b.time DESC")
     List<Booking> findAllByOrderByDateDescTimeDesc();

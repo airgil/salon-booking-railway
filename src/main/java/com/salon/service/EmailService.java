@@ -19,28 +19,20 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String fromEmail;
 
+    @Value("${app.email.enabled:true}")
+    private boolean emailEnabled;
+
     public void sendBookingConfirmation(Booking booking, User customer) {
+        if (!emailEnabled) {
+            System.out.println("Email would be sent to: " + customer.getEmail());
+            return;
+        }
+
         try {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom(fromEmail);
             message.setTo(customer.getEmail());
             message.setSubject("Booking Confirmation - Salon Booking System");
-
-            // Safe way to get service name
-            String serviceName = "Salon Service";
-            if (booking.getService() != null) {
-                try {
-                    serviceName = booking.getService().getServiceName();
-                } catch (Exception e) {
-                    serviceName = "Service #" + booking.getService().getId();
-                }
-            }
-
-            // Safe way to get staff name
-            String staffName = "TBD";
-            if (booking.getStaff() != null) {
-                staffName = booking.getStaff().getStaffName();
-            }
 
             String content = String.format(
                     "Dear %s,\n\n" +
@@ -48,16 +40,12 @@ public class EmailService {
                             "Booking ID: #%d\n" +
                             "Date: %s\n" +
                             "Time: %s\n" +
-                            "Service: %s\n" +
-                            "Staff: %s\n" +
                             "Status: %s\n\n" +
                             "Thank you for choosing us!",
                     customer.getFullName(),
                     booking.getId(),
                     booking.getDate().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy")),
                     booking.getTime().format(DateTimeFormatter.ofPattern("hh:mm a")),
-                    serviceName,
-                    staffName,
                     booking.getStatus()
             );
 
@@ -67,7 +55,40 @@ public class EmailService {
 
         } catch (Exception e) {
             System.err.println("Failed to send email: " + e.getMessage());
-            // Don't throw - booking is already saved
+        }
+    }
+
+    // ADD THIS METHOD - for reminders
+    public void sendReminder(Booking booking, User customer) {
+        if (!emailEnabled) {
+            System.out.println("Reminder would be sent to: " + customer.getEmail());
+            return;
+        }
+
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
+            message.setTo(customer.getEmail());
+            message.setSubject("Reminder: Your appointment is tomorrow!");
+
+            String content = String.format(
+                    "Dear %s,\n\n" +
+                            "This is a reminder that you have an appointment tomorrow.\n\n" +
+                            "Date: %s\n" +
+                            "Time: %s\n\n" +
+                            "Please arrive 5 minutes early.\n\n" +
+                            "Thank you!",
+                    customer.getFullName(),
+                    booking.getDate().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy")),
+                    booking.getTime().format(DateTimeFormatter.ofPattern("hh:mm a"))
+            );
+
+            message.setText(content);
+            mailSender.send(message);
+            System.out.println("Reminder sent to: " + customer.getEmail());
+
+        } catch (Exception e) {
+            System.err.println("Failed to send reminder: " + e.getMessage());
         }
     }
 }
