@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Booking Cancellation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+        }
+        .header {
+            background-color: #f44336;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .content {
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h2>Booking Cancelled</h2>
+    </div>
+    <div class="content">
+        <h3>Dear <span th:text="${customerName}">Customer</span>,</h3>
+        <p>Your booking has been successfully cancelled.</p>
+
+        <div class="booking-details">
+            <h4>Cancelled Booking:</h4>
+            <p><strong>Booking ID:</strong> #<span th:text="${bookingId}"></span></p>
+            <p><strong>Date:</strong> <span th:text="${bookingDate}"></span></p>
+            <p><strong>Time:</strong> <span th:text="${bookingTime}"></span></p>
+        </div>
+
+        <p>We hope to see you again soon!</p>
+    </div>
+    <div class="footer">
+        <p>&copy; 2024 Salon Booking System</p>
+    </div>
+</div>
+</body>
+</html>

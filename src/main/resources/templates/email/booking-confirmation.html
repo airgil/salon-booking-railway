@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Booking Confirmation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+        }
+        .header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .content {
+            padding: 20px;
+        }
+        .booking-details {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .footer {
+            font-size: 12px;
+            text-align: center;
+            color: #777;
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+        }
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h2>Booking Confirmation</h2>
+    </div>
+    <div class="content">
+        <h3>Dear <span th:text="${customerName}">Customer</span>,</h3>
+        <p>Thank you for booking with us! Your appointment has been confirmed.</p>
+
+        <div class="booking-details">
+            <h4>Booking Details:</h4>
+            <p><strong>Booking ID:</strong> #<span th:text="${bookingId}"></span></p>
+            <p><strong>Date:</strong> <span th:text="${bookingDate}"></span></p>
+            <p><strong>Time:</strong> <span th:text="${bookingTime}"></span></p>
+            <p><strong>Services:</strong> <span th:text="${services}"></span></p>
+            <p><strong>Status:</strong> <span th:text="${status}"></span></p>
+        </div>
+
+        <p><strong>What to bring:</strong></p>
+        <ul>
+            <li>Your confirmation email</li>
+            <li>Any reference photos (if applicable)</li>
+        </ul>
+
+        <p><strong>Need to cancel or reschedule?</strong></p>
+        <p>You can manage your booking by logging into your account.</p>
+
+        <p style="margin-top: 20px;">
+            <a href="https://your-app.onrender.com/my-bookings" class="button">View My Bookings</a>
+        </p>
+    </div>
+    <div class="footer">
+        <p>This is an automated message, please do not reply.</p>
+        <p>&copy; 2024 Salon Booking System</p>
+    </div>
+</div>
+</body>
+</html>
