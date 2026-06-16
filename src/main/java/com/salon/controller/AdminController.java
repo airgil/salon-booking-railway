@@ -80,7 +80,10 @@ public class AdminController {
 
     @PostMapping("/staff/add")
     public String addStaff(@ModelAttribute Staff staff) {
-        staff.setAvailable(true);
+        // Use either setAvailable or setIsAvailable based on your Staff entity
+        staff.setIsAvailable(true);  // ← Use this if your entity has setIsAvailable
+        // OR
+        // staff.setAvailable(true);  // ← Use this if you added the setAvailable method
         staffRepository.save(staff);
         return "redirect:/admin/staff";
     }

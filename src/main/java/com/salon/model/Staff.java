@@ -27,7 +27,7 @@ public class Staff {
         this.isAvailable = true;
     }
 
-    // Getters and setters
+    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -40,12 +40,13 @@ public class Staff {
     public Boolean getIsAvailable() { return isAvailable; }
     public void setIsAvailable(Boolean isAvailable) { this.isAvailable = isAvailable; }
 
-    // Convenience methods
-    public Boolean getAvailable() {
-        return isAvailable;
-    }
-
+    // ADD THIS METHOD - for AdminController
     public void setAvailable(Boolean available) {
         this.isAvailable = available;
+    }
+
+    // Optional: also add getAvailable for consistency
+    public Boolean getAvailable() {
+        return isAvailable;
     }
 }
