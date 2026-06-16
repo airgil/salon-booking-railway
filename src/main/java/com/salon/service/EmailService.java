@@ -13,18 +13,18 @@ import java.time.format.DateTimeFormatter;
 @Service
 public class EmailService {
 
-    @Autowired
+    @Autowired(required = false)  // Make it optional
     private JavaMailSender mailSender;
 
-    @Value("${spring.mail.username}")
-    private String fromEmail;
-
-    @Value("${app.email.enabled:true}")
+    @Value("${app.email.enabled:false}")
     private boolean emailEnabled;
 
+    @Value("${spring.mail.username:}")
+    private String fromEmail;
+
     public void sendBookingConfirmation(Booking booking, User customer) {
-        if (!emailEnabled) {
-            System.out.println("Email would be sent to: " + customer.getEmail());
+        if (!emailEnabled || mailSender == null) {
+            System.out.println("Email disabled or mailSender not configured. Would send to: " + customer.getEmail());
             return;
         }
 
@@ -58,10 +58,9 @@ public class EmailService {
         }
     }
 
-    // ADD THIS METHOD - for reminders
     public void sendReminder(Booking booking, User customer) {
-        if (!emailEnabled) {
-            System.out.println("Reminder would be sent to: " + customer.getEmail());
+        if (!emailEnabled || mailSender == null) {
+            System.out.println("Email disabled - would send reminder to: " + customer.getEmail());
             return;
         }
 
