@@ -65,6 +65,15 @@ public class BookingController {
             return "redirect:/login";
         }
 
+        System.out.println("========================================");
+        System.out.println("📝 BOOKING REQUEST:");
+        System.out.println("  User: " + user.getFullName() + " (" + user.getEmail() + ")");
+        System.out.println("  Service ID: " + serviceId);
+        System.out.println("  Staff ID: " + staffId);
+        System.out.println("  Date: " + date);
+        System.out.println("  Time: " + time);
+        System.out.println("========================================");
+
         try {
             Booking booking = new Booking();
             booking.setUser(user);
@@ -75,17 +84,23 @@ public class BookingController {
             booking.setStatus("confirmed");
 
             Booking savedBooking = bookingRepository.save(booking);
+            System.out.println("✅ Booking saved with ID: " + savedBooking.getId());
 
+            // Send email confirmation
+            System.out.println("📧 Attempting to send email to: " + user.getEmail());
             try {
                 emailService.sendBookingConfirmation(savedBooking, user);
+                System.out.println("✅ Email send attempt completed");
             } catch (Exception e) {
-                System.out.println("Email not sent: " + e.getMessage());
+                System.err.println("❌ Email failed: " + e.getMessage());
+                e.printStackTrace();
             }
 
             return "redirect:/my-bookings?success=true";
 
         } catch (Exception e) {
-            System.out.println("Booking failed: " + e.getMessage());
+            System.err.println("❌ Booking failed: " + e.getMessage());
+            e.printStackTrace();
             return "redirect:/book?error=true";
         }
     }
@@ -114,5 +129,37 @@ public class BookingController {
         return "redirect:/my-bookings";
     }
 
-    // REMOVED: adminBookings method - no longer needed
+    @GetMapping("/test-email")
+    @ResponseBody
+    public String testEmail(HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "❌ Please login first at /login";
+        }
+
+        System.out.println("========================================");
+        System.out.println("📧 TEST EMAIL REQUEST");
+        System.out.println("  User: " + user.getFullName());
+        System.out.println("  Email: " + user.getEmail());
+        System.out.println("========================================");
+
+        try {
+            Booking testBooking = new Booking();
+            testBooking.setId(999L);
+            testBooking.setDate(LocalDate.now());
+            testBooking.setTime(LocalTime.now());
+            testBooking.setStatus("test");
+            testBooking.setUser(user);
+
+            System.out.println("📧 Calling emailService.sendBookingConfirmation...");
+            emailService.sendBookingConfirmation(testBooking, user);
+            System.out.println("✅ Test email complete!");
+
+            return "✅ Test email sent to: " + user.getEmail() + ". Check your inbox and spam folder!";
+        } catch (Exception e) {
+            System.err.println("❌ Test email failed: " + e.getMessage());
+            e.printStackTrace();
+            return "❌ Email failed: " + e.getMessage();
+        }
+    }
 }
