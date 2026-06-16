@@ -3,9 +3,8 @@ package com.salon.controller;
 import com.salon.model.User;
 import com.salon.service.UserService;
 import com.salon.service.EmailService;
+import com.salon.service.BrevoEmailService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,7 +24,7 @@ public class AuthController {
     private EmailService emailService;
 
     @Autowired(required = false)
-    private JavaMailSender mailSender;
+    private BrevoEmailService brevoEmailService;
 
     // ===== GET MAPPINGS =====
 
@@ -115,27 +114,31 @@ public class AuthController {
     @ResponseBody
     public String emailStatus() {
         return "Email Service Status:\n" +
-                "MailSender: " + (mailSender != null ? "✅ Available" : "❌ NULL") + "\n" +
+                "BrevoEmailService: " + (brevoEmailService != null ? "✅ Available" : "❌ NULL") + "\n" +
                 "EmailService: " + (emailService != null ? "✅ Available" : "❌ NULL");
     }
 
     @GetMapping("/test-email-simple")
     @ResponseBody
     public String testEmailSimple(@RequestParam String email) {
-        if (mailSender == null) {
-            return "❌ MailSender is NULL. Check spring-boot-starter-mail dependency.";
+        if (brevoEmailService == null) {
+            return "❌ BrevoEmailService is NULL. Check dependency.";
         }
 
         try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom("airgilstudio@gmail.com");
-            message.setTo(email);
-            message.setSubject("Test Email from Salon Booking");
-            message.setText("This is a test email from your Salon Booking System!\n\n" +
-                    "If you received this, email is working correctly.\n\n" +
-                    "Best regards,\n" +
-                    "Salon Booking System");
-            mailSender.send(message);
+            // Create a test booking
+            com.salon.model.Booking testBooking = new com.salon.model.Booking();
+            testBooking.setId(999L);
+            testBooking.setDate(java.time.LocalDate.now());
+            testBooking.setTime(java.time.LocalTime.now());
+            testBooking.setStatus("test");
+
+            // Create a test user
+            User testUser = new User();
+            testUser.setEmail(email);
+            testUser.setFullName("Test User");
+
+            brevoEmailService.sendBookingConfirmation(testBooking, testUser);
             return "✅ Test email sent to: " + email + ". Check your inbox and spam folder!";
         } catch (Exception e) {
             return "❌ Email failed: " + e.getMessage();
