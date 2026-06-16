@@ -30,7 +30,7 @@
                     <form action="/admin/staff/add" method="post">
                         <div class="mb-3">
                             <label class="form-label">Staff Name</label>
-                            <input type="text" name="name" class="form-control" required>
+                            <input type="text" name="staffName" class="form-control" required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Specialty</label>
@@ -61,12 +61,16 @@
                             <tbody>
                             <tr th:each="staff : ${staff}">
                                 <td th:text="${staff.id}">1</td>
-                                <td th:text="${staff.name}">John Smith</td>
+                                <td th:text="${staff.staffName}">John Smith</td>
                                 <td th:text="${staff.specialty}">Hair Stylist</td>
                                 <td>
-                                            <span class="badge" th:class="${staff.available ? 'bg-success' : 'bg-danger'}"
-                                                  th:text="${staff.available ? 'Yes' : 'No'}">Yes</span>
+                                    <span class="badge"
+                                          th:class="${staff.isAvailable ? 'bg-success' : 'bg-danger'}"
+                                          th:text="${staff.isAvailable ? 'Yes' : 'No'}">Yes</span>
                                 </td>
+                            </tr>
+                            <tr th:if="${staff == null or staff.isEmpty()}">
+                                <td colspan="4" class="text-center">No staff found</td>
                             </tr>
                             </tbody>
                         </table>
