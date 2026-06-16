@@ -7,6 +7,7 @@ import com.salon.model.User;
 import com.salon.repository.ServiceRepository;
 import com.salon.repository.StaffRepository;
 import com.salon.service.BookingService;
+import com.salon.service.EmailService;  // ← ADD THIS IMPORT
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -29,6 +30,9 @@ public class CustomerController {
 
     @Autowired
     private StaffRepository staffRepository;
+
+    @Autowired
+    private EmailService emailService;  // ← ADD THIS
 
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session, Model model) {
@@ -60,6 +64,16 @@ public class CustomerController {
         User user = (User) session.getAttribute("user");
         if (user == null) return "redirect:/login";
 
+        System.out.println("========================================");
+        System.out.println("📝 BOOKING REQUEST:");
+        System.out.println("  User: " + user.getFullName());
+        System.out.println("  Email: " + user.getEmail());
+        System.out.println("  Service ID: " + serviceId);
+        System.out.println("  Staff ID: " + staffId);
+        System.out.println("  Date: " + date);
+        System.out.println("  Time: " + time);
+        System.out.println("========================================");
+
         LocalDate bookingDate = LocalDate.parse(date);
         LocalTime bookingTime = LocalTime.parse(time);
 
@@ -81,8 +95,21 @@ public class CustomerController {
         booking.setStaff(staffRepository.findById(staffId).orElse(null));
         booking.setDate(bookingDate);
         booking.setTime(bookingTime);
+        booking.setStatus("confirmed");
 
-        bookingService.createBooking(booking);
+        Booking savedBooking = bookingService.createBooking(booking);
+        System.out.println("✅ Booking saved with ID: " + savedBooking.getId());
+
+        // SEND EMAIL CONFIRMATION
+        try {
+            System.out.println("📧 Attempting to send email to: " + user.getEmail());
+            emailService.sendBookingConfirmation(savedBooking, user);
+            System.out.println("✅ Email sent successfully!");
+        } catch (Exception e) {
+            System.err.println("❌ Email failed: " + e.getMessage());
+            e.printStackTrace();
+        }
+
         return "redirect:/customer/dashboard";
     }
 
@@ -92,7 +119,27 @@ public class CustomerController {
         return "redirect:/customer/dashboard";
     }
 
+    // Test endpoint for booking email
+    @GetMapping("/test-booking-email")
+    @ResponseBody
+    public String testBookingEmail(HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "❌ Please login first";
+        }
 
+        try {
+            Booking testBooking = new Booking();
+            testBooking.setId(888L);
+            testBooking.setDate(LocalDate.now());
+            testBooking.setTime(LocalTime.now());
+            testBooking.setStatus("confirmed");
+            testBooking.setUser(user);
 
-
+            emailService.sendBookingConfirmation(testBooking, user);
+            return "✅ Booking email sent to: " + user.getEmail();
+        } catch (Exception e) {
+            return "❌ Email failed: " + e.getMessage();
+        }
+    }
 }

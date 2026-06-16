@@ -24,10 +24,9 @@ public class BookingService {
     @Autowired
     private ServiceRepository serviceRepository;
 
-    public boolean createBooking(Booking booking) {
+    public Booking createBooking(Booking booking) {
         booking.setStatus("pending");
-        bookingRepository.save(booking);
-        return true;
+        return bookingRepository.save(booking);  // ← Must return the saved booking
     }
 
     public boolean isTimeSlotAvailable(Long staffId, LocalDate date, LocalTime time) {
