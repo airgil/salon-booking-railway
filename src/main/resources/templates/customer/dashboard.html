@@ -8,7 +8,7 @@
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
-        <a class="navbar-brand" href="/">✂️ Salon Booking</a>
+        <a class="navbar-brand" href="#">✂️ Salon Booking</a>
         <div class="navbar-nav ms-auto">
             <span class="nav-link text-white">Welcome, <span th:text="${user.fullName}"></span></span>
             <a class="nav-link" href="/logout">Logout</a>
@@ -34,28 +34,39 @@
                     <h5>My Recent Bookings</h5>
                 </div>
                 <div class="card-body">
-                    <div th:if="${bookings.empty}" class="alert alert-info">
+                    <div th:if="${bookings == null or bookings.isEmpty()}" class="alert alert-info">
                         No bookings yet. <a href="/customer/book">Book now!</a>
                     </div>
-                    <div th:unless="${bookings.empty}">
+                    <div th:unless="${bookings == null or bookings.isEmpty()}">
                         <table class="table">
                             <thead>
-                            <tr><th>Service</th><th>Staff</th><th>Date</th><th>Time</th><th>Status</th><th>Action</th></tr>
+                            <tr>
+                                <th>Service</th>
+                                <th>Staff</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
                             </thead>
                             <tbody>
                             <tr th:each="booking : ${bookings}">
-                                <td th:text="${booking.service.name}"></td>
-                                <td th:text="${booking.staff.name}"></td>
+                                <td th:text="${booking.service != null ? booking.service.serviceName : 'N/A'}"></td>
+                                <td th:text="${booking.staff != null ? booking.staff.staffName : 'TBD'}"></td>
                                 <td th:text="${booking.date}"></td>
                                 <td th:text="${booking.time}"></td>
                                 <td>
-                                            <span class="badge" th:class="${booking.status == 'confirmed' ? 'bg-success' : 'bg-warning'}"
-                                                  th:text="${booking.status}"></span>
+                                    <span class="badge"
+                                          th:class="${booking.status == 'confirmed' ? 'bg-success' :
+                                                    booking.status == 'pending' ? 'bg-warning' :
+                                                    booking.status == 'cancelled' ? 'bg-danger' : 'bg-secondary'}"
+                                          th:text="${booking.status}"></span>
                                 </td>
                                 <td>
-                                    <a th:if="${booking.status == 'pending'}"
+                                    <a th:if="${booking.status == 'pending' or booking.status == 'confirmed'}"
                                        th:href="@{/customer/cancel/{id}(id=${booking.id})}"
-                                       class="btn btn-sm btn-danger">Cancel</a>
+                                       class="btn btn-sm btn-danger"
+                                       onclick="return confirm('Cancel this booking?')">Cancel</a>
                                 </td>
                             </tr>
                             </tbody>

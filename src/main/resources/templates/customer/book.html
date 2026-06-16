@@ -32,7 +32,7 @@
                             <select name="serviceId" class="form-control" required>
                                 <option th:each="service : ${services}"
                                         th:value="${service.id}"
-                                        th:text="${service.name} + ' - $' + ${service.price} + ' (' + ${service.duration} + ' min)'">
+                                        th:text="${service.serviceName} + ' - $' + ${service.price} + ' (' + ${service.duration} + ' min)'">
                                 </option>
                             </select>
                         </div>
@@ -42,7 +42,7 @@
                             <select name="staffId" class="form-control" required>
                                 <option th:each="staff : ${staff}"
                                         th:value="${staff.id}"
-                                        th:text="${staff.name} + ' - ' + ${staff.specialty}">
+                                        th:text="${staff.staffName} + ' - ' + ${staff.specialty}">
                                 </option>
                             </select>
                         </div>
