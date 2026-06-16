@@ -1,33 +1,43 @@
 package com.salon.model;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "staff")
 public class Staff {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "staff_name")
-    private String name;
+    private String staffName;
 
     private String specialty;
 
     @Column(name = "is_available")
-    private Boolean available;
+    private Boolean isAvailable = true;
 
-    public Staff() {
-        this.available = true;
+    // Constructors
+    public Staff() {}
+
+    public Staff(String staffName, String specialty) {
+        this.staffName = staffName;
+        this.specialty = specialty;
+        this.isAvailable = true;
     }
 
     // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+
+    public String getStaffName() { return staffName; }
+    public void setStaffName(String staffName) { this.staffName = staffName; }
+
     public String getSpecialty() { return specialty; }
     public void setSpecialty(String specialty) { this.specialty = specialty; }
-    public Boolean getAvailable() { return available; }
-    public void setAvailable(Boolean available) { this.available = available; }
+
+    public Boolean getIsAvailable() { return isAvailable; }
+    public void setIsAvailable(Boolean isAvailable) { this.isAvailable = isAvailable; }
 }

@@ -33,16 +33,16 @@ public class BookingService {
     public boolean isTimeSlotAvailable(Long staffId, LocalDate date, LocalTime time) {
         Staff staff = staffRepository.findById(staffId).orElse(null);
         if (staff == null) return false;
-        int count = bookingRepository.countByStaffAndDateAndTimeAndStatusNot(staff, date, time, "cancelled");
+        long count = bookingRepository.countByStaffAndDateAndTimeAndStatusNot(staff, date, time, "cancelled");
         return count == 0;
     }
 
     public List<Booking> getUserBookings(User user) {
-        return bookingRepository.findByUserOrderByDateDescTimeDesc(user);
+        return bookingRepository.findByUserOrderByDateDesc(user);
     }
 
     public List<Booking> getAllBookings() {
-        return bookingRepository.findAllByOrderByDateDescTimeDesc();
+        return bookingRepository.findAll();
     }
 
     public boolean cancelBooking(Long bookingId) {
