@@ -8,11 +8,8 @@ import java.util.List;
 @Repository
 public interface StaffRepository extends JpaRepository<Staff, Long> {
 
-    // Find available staff
+    // Find available staff - CORRECTED
     List<Staff> findByIsAvailableTrue();
-
-    // Alternative method name if using different field name
-    List<Staff> findByAvailableTrue();
 
     // Find staff by availability
     List<Staff> findByIsAvailable(Boolean isAvailable);
