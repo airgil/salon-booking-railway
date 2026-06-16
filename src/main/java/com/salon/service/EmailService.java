@@ -115,5 +115,5 @@ public class EmailService {
             System.err.println("❌ Failed to send reminder: " + e.getMessage());
         }
     }
-
+    
 }
