@@ -8,13 +8,9 @@ import java.util.List;
 @Repository
 public interface StaffRepository extends JpaRepository<Staff, Long> {
 
-    // Method if your field is "available"
-    List<Staff> findByAvailableTrue();
-
-    // Method if your field is "isAvailable"
+    // CORRECT - matches your Staff entity field "isAvailable"
     List<Staff> findByIsAvailableTrue();
 
-    // Find by availability with parameter
-    List<Staff> findByAvailable(Boolean available);
+    // Also add this for flexibility
     List<Staff> findByIsAvailable(Boolean isAvailable);
 }

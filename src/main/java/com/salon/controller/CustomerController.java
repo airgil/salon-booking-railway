@@ -44,7 +44,7 @@ public class CustomerController {
     @GetMapping("/book")
     public String bookPage(Model model) {
         List<Service> services = serviceRepository.findByActiveTrue();
-        List<Staff> staff = staffRepository.findByAvailableTrue();
+        List<Staff> staff = staffRepository.findByIsAvailableTrue();
         model.addAttribute("services", services);
         model.addAttribute("staff", staff);
         return "customer/book";
@@ -71,7 +71,7 @@ public class CustomerController {
         if (!bookingService.isTimeSlotAvailable(staffId, bookingDate, bookingTime)) {
             model.addAttribute("error", "Time slot not available");
             model.addAttribute("services", serviceRepository.findByActiveTrue());
-            model.addAttribute("staff", staffRepository.findByAvailableTrue());
+            model.addAttribute("staff", staffRepository.findByIsAvailableTrue());
             return "customer/book";
         }
 
