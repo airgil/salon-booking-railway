@@ -17,6 +17,9 @@ public class UserService {
         if (userRepository.existsByUsername(user.getUsername())) {
             return false;
         }
+        if (userRepository.existsByEmail(user.getEmail())) {
+            return false;
+        }
         user.setRole("customer");
         user.setCreatedAt(LocalDateTime.now());
         userRepository.save(user);
@@ -30,5 +33,15 @@ public class UserService {
 
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
+    }
+
+    // ADD THIS METHOD - it's missing!
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    // ADD THIS METHOD - for convenience
+    public User findById(Long id) {
+        return userRepository.findById(id).orElse(null);
     }
 }
