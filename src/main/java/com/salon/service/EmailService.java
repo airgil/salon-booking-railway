@@ -2,135 +2,102 @@ package com.salon.service;
 
 import com.salon.model.Booking;
 import com.salon.model.User;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.sun.jdi.connect.Transport;
+import org.apache.logging.log4j.message.Message;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.Context;
 
+import javax.mail.*;
+import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.websocket.Session;
+import java.net.Authenticator;
+import java.net.PasswordAuthentication;
 import java.time.format.DateTimeFormatter;
+import java.util.Properties;
 
 @Service
 public class EmailService {
 
-    @Autowired
-    private JavaMailSender mailSender;
-
-    @Autowired
-    private TemplateEngine templateEngine;
-
-    @Value("${app.email.from}")
+    @Value("${spring.mail.username}")
     private String fromEmail;
 
-    // Simple text email
+    @Value("${spring.mail.password}")
+    private String password;
+
+    private Session getEmailSession() {
+        Properties props = new Properties();
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.starttls.required", "true");
+        props.put("mail.smtp.ssl.protocols", "TLSv1.2");
+
+        return Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(fromEmail, password);
+            }
+        });
+    }
+
     public void sendSimpleEmail(String to, String subject, String content) {
         try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(fromEmail);
-            message.setTo(to);
+            Message message = new MimeMessage(getEmailSession());
+            message.setFrom(new InternetAddress(fromEmail));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
             message.setSubject(subject);
             message.setText(content);
-            mailSender.send(message);
+            Transport.send(message);
             System.out.println("Email sent successfully to: " + to);
-        } catch (Exception e) {
+        } catch (MessagingException e) {
             System.err.println("Failed to send email: " + e.getMessage());
         }
     }
 
-    // HTML email with template
     public void sendBookingConfirmation(Booking booking, User customer) {
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-            helper.setFrom(fromEmail);
-            helper.setTo(customer.getEmail());
-            helper.setSubject("Booking Confirmation - Salon Booking System");
-
-            Context context = new Context();
-            context.setVariable("customerName", customer.getFullName());
-            // FIXED: Use getDate() and getTime() (not getBookingDate/getBookingTime)
-            context.setVariable("bookingDate", booking.getDate().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy")));
-            context.setVariable("bookingTime", booking.getTime().format(DateTimeFormatter.ofPattern("hh:mm a")));
-            context.setVariable("status", booking.getStatus());
-            context.setVariable("bookingId", booking.getId());
-
-            // Get service and staff names
-            String serviceName = booking.getService() != null ? booking.getService().getServiceName() : "N/A";
-            String staffName = booking.getStaff() != null ? booking.getStaff().getStaffName() : "N/A";
-            context.setVariable("service", serviceName);
-            context.setVariable("staff", staffName);
-
-            String htmlContent = templateEngine.process("email/booking-confirmation", context);
-            helper.setText(htmlContent, true);
-
-            mailSender.send(message);
-            System.out.println("Booking confirmation sent to: " + customer.getEmail());
-
-        } catch (Exception e) {
-            System.err.println("Failed to send booking confirmation: " + e.getMessage());
-        }
-    }
-
-    public void sendBookingCancellation(Booking booking, User customer) {
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-            helper.setFrom(fromEmail);
-            helper.setTo(customer.getEmail());
-            helper.setSubject("Booking Cancellation - Salon Booking System");
-
-            Context context = new Context();
-            context.setVariable("customerName", customer.getFullName());
-            // FIXED: Use getDate() and getTime()
-            context.setVariable("bookingDate", booking.getDate().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy")));
-            context.setVariable("bookingTime", booking.getTime().format(DateTimeFormatter.ofPattern("hh:mm a")));
-            context.setVariable("bookingId", booking.getId());
-
-            String htmlContent = templateEngine.process("email/booking-cancellation", context);
-            helper.setText(htmlContent, true);
-
-            mailSender.send(message);
-            System.out.println("Cancellation email sent to: " + customer.getEmail());
-
-        } catch (Exception e) {
-            System.err.println("Failed to send cancellation email: " + e.getMessage());
-        }
+        String subject = "Booking Confirmation - Salon Booking System";
+        String content = String.format(
+                "Dear %s,\n\n" +
+                        "Your booking has been confirmed!\n\n" +
+                        "Booking ID: #%d\n" +
+                        "Date: %s\n" +
+                        "Time: %s\n" +
+                        "Service: %s\n" +
+                        "Staff: %s\n" +
+                        "Status: %s\n\n" +
+                        "Thank you for choosing us!",
+                customer.getFullName(),
+                booking.getId(),
+                booking.getDate().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy")),
+                booking.getTime().format(DateTimeFormatter.ofPattern("hh:mm a")),
+                booking.getService() != null ? booking.getService().getServiceName() : "N/A",
+                booking.getStaff() != null ? booking.getStaff().getStaffName() : "N/A",
+                booking.getStatus()
+        );
+        sendSimpleEmail(customer.getEmail(), subject, content);
     }
 
     public void sendReminder(Booking booking, User customer) {
-        try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(fromEmail);
-            message.setTo(customer.getEmail());
-            message.setSubject("Reminder: Your appointment is tomorrow!");
+        String subject = "Reminder: Your appointment is tomorrow!";
+        String serviceName = booking.getService() != null ? booking.getService().getServiceName() : "your appointment";
 
-            String serviceName = booking.getService() != null ? booking.getService().getServiceName() : "your appointment";
-
-            message.setText(String.format(
-                    "Dear %s,\n\nThis is a reminder that you have an appointment tomorrow at %s.\n\n" +
-                            "Service: %s\n" +
-                            "Date: %s\n" +
-                            "Time: %s\n\n" +
-                            "Staff: %s\n\n" +
-                            "Please arrive 5 minutes early.\n\n" +
-                            "To cancel or reschedule, please log into your account.\n\n" +
-                            "Thank you!",
-                    customer.getFullName(),
-                    booking.getTime(),
-                    serviceName,
-                    booking.getDate(),
-                    booking.getTime(),
-                    booking.getStaff() != null ? booking.getStaff().getStaffName() : "TBD"
-            ));
-            mailSender.send(message);
-        } catch (Exception e) {
-            System.err.println("Failed to send reminder: " + e.getMessage());
-        }
+        String content = String.format(
+                "Dear %s,\n\n" +
+                        "This is a reminder that you have an appointment tomorrow.\n\n" +
+                        "Service: %s\n" +
+                        "Date: %s\n" +
+                        "Time: %s\n" +
+                        "Staff: %s\n\n" +
+                        "Please arrive 5 minutes early.\n\n" +
+                        "Thank you!",
+                customer.getFullName(),
+                serviceName,
+                booking.getDate(),
+                booking.getTime(),
+                booking.getStaff() != null ? booking.getStaff().getStaffName() : "TBD"
+        );
+        sendSimpleEmail(customer.getEmail(), subject, content);
     }
 }
