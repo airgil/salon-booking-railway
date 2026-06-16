@@ -26,10 +26,10 @@ public class BookingController {
     private BookingRepository bookingRepository;
 
     @Autowired
-    private ServiceRepository serviceRepository;  // ← This was missing
+    private ServiceRepository serviceRepository;
 
     @Autowired
-    private StaffRepository staffRepository;      // ← Add this too
+    private StaffRepository staffRepository;
 
     @Autowired
     private BookingService bookingService;
@@ -37,7 +37,6 @@ public class BookingController {
     @Autowired
     private EmailService emailService;
 
-    // Show booking form
     @GetMapping("/book")
     public String showBookingForm(Model model, HttpSession session) {
         User user = (User) session.getAttribute("user");
@@ -55,7 +54,6 @@ public class BookingController {
         return "booking-form";
     }
 
-    // Create booking
     @PostMapping("/book")
     public String createBooking(@RequestParam Long serviceId,
                                 @RequestParam Long staffId,
@@ -78,7 +76,6 @@ public class BookingController {
 
             Booking savedBooking = bookingRepository.save(booking);
 
-            // Send email confirmation (optional - comment if not working)
             try {
                 emailService.sendBookingConfirmation(savedBooking, user);
             } catch (Exception e) {
@@ -93,7 +90,6 @@ public class BookingController {
         }
     }
 
-    // View user bookings
     @GetMapping("/my-bookings")
     public String myBookings(Model model, HttpSession session) {
         User user = (User) session.getAttribute("user");
@@ -107,7 +103,6 @@ public class BookingController {
         return "my-bookings";
     }
 
-    // Cancel booking
     @PostMapping("/cancel-booking/{id}")
     public String cancelBooking(@PathVariable Long id, HttpSession session) {
         User user = (User) session.getAttribute("user");
@@ -119,17 +114,5 @@ public class BookingController {
         return "redirect:/my-bookings";
     }
 
-    // Admin - view all bookings
-    @GetMapping("/admin/bookings")
-    public String adminBookings(Model model, HttpSession session) {
-        User user = (User) session.getAttribute("user");
-        if (user == null || !"admin".equals(user.getRole())) {
-            return "redirect:/login";
-        }
-
-        List<Booking> bookings = bookingRepository.findAllByOrderByDateDescTimeDesc();
-        model.addAttribute("bookings", bookings);
-
-        return "admin/bookings";
-    }
+    // REMOVED: adminBookings method - no longer needed
 }
