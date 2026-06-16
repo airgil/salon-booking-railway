@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -20,16 +21,20 @@ public class ReminderService {
     @Autowired
     private EmailService emailService;
 
+    // Runs every day at 9 AM
     @Scheduled(cron = "0 0 9 * * *")
     public void sendDailyReminders() {
         LocalDate tomorrow = LocalDate.now().plusDays(1);
-        List<Booking> tomorrowBookings = bookingRepository.findByDate(tomorrow);
+
+        // Use the correct method - matches your entity field 'date'
+        List<Booking> tomorrowBookings = bookingRepository.findConfirmedBookingsByDate(tomorrow);
 
         for (Booking booking : tomorrowBookings) {
-            if (booking.getUser() != null && "confirmed".equals(booking.getStatus())) {
+            if (booking.getUser() != null) {
                 emailService.sendReminder(booking, booking.getUser());
             }
         }
-        System.out.println("Sent reminders for " + tomorrow);
+
+        System.out.println("Sent " + tomorrowBookings.size() + " reminders for " + tomorrow);
     }
 }

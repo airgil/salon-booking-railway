@@ -8,7 +8,6 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.time.format.DateTimeFormatter;
 
 @Service
@@ -23,26 +22,29 @@ public class EmailService {
     @Value("${spring.mail.username:}")
     private String fromEmail;
 
-    @PostConstruct
-    public void init() {
+    public void sendBookingConfirmation(Booking booking, User customer) {
+        // Detailed debug logging
         System.out.println("========================================");
-        System.out.println("📧 EMAIL SERVICE INITIALIZED");
+        System.out.println("📧 EMAIL DEBUG INFO:");
         System.out.println("  emailEnabled: " + emailEnabled);
         System.out.println("  mailSender: " + (mailSender != null ? "✅ Available" : "❌ NULL"));
         System.out.println("  fromEmail: '" + fromEmail + "'");
-        System.out.println("========================================");
-    }
-
-    // Method for booking confirmation
-    public void sendBookingConfirmation(Booking booking, User customer) {
-        System.out.println("========================================");
-        System.out.println("📧 SENDING BOOKING CONFIRMATION");
-        System.out.println("  Enabled: " + emailEnabled);
-        System.out.println("  To: " + customer.getEmail());
+        System.out.println("  toEmail: " + customer.getEmail());
+        System.out.println("  booking ID: " + booking.getId());
         System.out.println("========================================");
 
-        if (!emailEnabled || mailSender == null || fromEmail == null || fromEmail.isEmpty()) {
-            System.out.println("❌ Email not configured properly");
+        if (!emailEnabled) {
+            System.out.println("❌ Email is DISABLED. Set APP_EMAIL_ENABLED=true in Render");
+            return;
+        }
+
+        if (mailSender == null) {
+            System.out.println("❌ mailSender is NULL. Check spring-boot-starter-mail dependency");
+            return;
+        }
+
+        if (fromEmail == null || fromEmail.isEmpty()) {
+            System.out.println("❌ fromEmail is empty. Set SPRING_MAIL_USERNAME in Render");
             return;
         }
 
@@ -73,24 +75,17 @@ public class EmailService {
 
             message.setText(content);
             mailSender.send(message);
-            System.out.println("✅ Email sent to: " + customer.getEmail());
+            System.out.println("✅ Booking confirmation sent to: " + customer.getEmail());
 
         } catch (Exception e) {
-            System.err.println("❌ Email failed: " + e.getMessage());
+            System.err.println("❌ Failed to send email: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    // ADD THIS METHOD - for reminders
     public void sendReminder(Booking booking, User customer) {
-        System.out.println("========================================");
-        System.out.println("📧 SENDING REMINDER");
-        System.out.println("  Enabled: " + emailEnabled);
-        System.out.println("  To: " + customer.getEmail());
-        System.out.println("========================================");
-
-        if (!emailEnabled || mailSender == null || fromEmail == null || fromEmail.isEmpty()) {
-            System.out.println("❌ Email not configured properly");
+        if (!emailEnabled || mailSender == null) {
+            System.out.println("📧 Reminder disabled - would send to: " + customer.getEmail());
             return;
         }
 
@@ -104,16 +99,12 @@ public class EmailService {
                     "Dear %s,\n\n" +
                             "This is a reminder that you have an appointment tomorrow.\n\n" +
                             "Date: %s\n" +
-                            "Time: %s\n" +
-                            "Service: %s\n" +
-                            "Staff: %s\n\n" +
+                            "Time: %s\n\n" +
                             "Please arrive 5 minutes early.\n\n" +
                             "Thank you!",
                     customer.getFullName(),
                     booking.getDate().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy")),
-                    booking.getTime().format(DateTimeFormatter.ofPattern("hh:mm a")),
-                    booking.getService() != null ? booking.getService().getServiceName() : "N/A",
-                    booking.getStaff() != null ? booking.getStaff().getStaffName() : "TBD"
+                    booking.getTime().format(DateTimeFormatter.ofPattern("hh:mm a"))
             );
 
             message.setText(content);
@@ -121,8 +112,8 @@ public class EmailService {
             System.out.println("✅ Reminder sent to: " + customer.getEmail());
 
         } catch (Exception e) {
-            System.err.println("❌ Reminder failed: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("❌ Failed to send reminder: " + e.getMessage());
         }
     }
+
 }
