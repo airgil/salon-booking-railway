@@ -4,116 +4,34 @@ import com.salon.model.Booking;
 import com.salon.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
-
-import java.time.format.DateTimeFormatter;
 
 @Service
 public class EmailService {
 
     @Autowired(required = false)
-    private JavaMailSender mailSender;
+    private BrevoEmailService brevoEmailService;
 
     @Value("${app.email.enabled:false}")
     private boolean emailEnabled;
 
-    @Value("${spring.mail.username:}")
-    private String fromEmail;
-
     public void sendBookingConfirmation(Booking booking, User customer) {
-        // Detailed debug logging
-        System.out.println("========================================");
-        System.out.println("📧 EMAIL DEBUG INFO:");
-        System.out.println("  emailEnabled: " + emailEnabled);
-        System.out.println("  mailSender: " + (mailSender != null ? "✅ Available" : "❌ NULL"));
-        System.out.println("  fromEmail: '" + fromEmail + "'");
-        System.out.println("  toEmail: " + customer.getEmail());
-        System.out.println("  booking ID: " + booking.getId());
-        System.out.println("========================================");
-
         if (!emailEnabled) {
-            System.out.println("❌ Email is DISABLED. Set APP_EMAIL_ENABLED=true in Render");
+            System.out.println("📧 Email disabled - would send to: " + customer.getEmail());
             return;
         }
 
-        if (mailSender == null) {
-            System.out.println("❌ mailSender is NULL. Check spring-boot-starter-mail dependency");
-            return;
-        }
-
-        if (fromEmail == null || fromEmail.isEmpty()) {
-            System.out.println("❌ fromEmail is empty. Set SPRING_MAIL_USERNAME in Render");
-            return;
-        }
-
-        try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(fromEmail);
-            message.setTo(customer.getEmail());
-            message.setSubject("Booking Confirmation - Salon Booking System");
-
-            String content = String.format(
-                    "Dear %s,\n\n" +
-                            "Your booking has been confirmed!\n\n" +
-                            "Booking ID: #%d\n" +
-                            "Date: %s\n" +
-                            "Time: %s\n" +
-                            "Service: %s\n" +
-                            "Staff: %s\n" +
-                            "Status: %s\n\n" +
-                            "Thank you for choosing us!",
-                    customer.getFullName(),
-                    booking.getId(),
-                    booking.getDate().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy")),
-                    booking.getTime().format(DateTimeFormatter.ofPattern("hh:mm a")),
-                    booking.getService() != null ? booking.getService().getServiceName() : "N/A",
-                    booking.getStaff() != null ? booking.getStaff().getStaffName() : "TBD",
-                    booking.getStatus()
-            );
-
-            message.setText(content);
-            mailSender.send(message);
-            System.out.println("✅ Booking confirmation sent to: " + customer.getEmail());
-
-        } catch (Exception e) {
-            System.err.println("❌ Failed to send email: " + e.getMessage());
-            e.printStackTrace();
+        if (brevoEmailService != null) {
+            brevoEmailService.sendBookingConfirmation(booking, customer);
+        } else {
+            System.out.println("❌ No email service available");
         }
     }
 
     public void sendReminder(Booking booking, User customer) {
-        if (!emailEnabled || mailSender == null) {
-            System.out.println("📧 Reminder disabled - would send to: " + customer.getEmail());
+        if (!emailEnabled || brevoEmailService == null) {
             return;
         }
-
-        try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(fromEmail);
-            message.setTo(customer.getEmail());
-            message.setSubject("Reminder: Your appointment is tomorrow!");
-
-            String content = String.format(
-                    "Dear %s,\n\n" +
-                            "This is a reminder that you have an appointment tomorrow.\n\n" +
-                            "Date: %s\n" +
-                            "Time: %s\n\n" +
-                            "Please arrive 5 minutes early.\n\n" +
-                            "Thank you!",
-                    customer.getFullName(),
-                    booking.getDate().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy")),
-                    booking.getTime().format(DateTimeFormatter.ofPattern("hh:mm a"))
-            );
-
-            message.setText(content);
-            mailSender.send(message);
-            System.out.println("✅ Reminder sent to: " + customer.getEmail());
-
-        } catch (Exception e) {
-            System.err.println("❌ Failed to send reminder: " + e.getMessage());
-        }
+        brevoEmailService.sendReminder(booking, customer);
     }
-
 }
