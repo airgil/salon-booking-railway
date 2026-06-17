@@ -125,7 +125,19 @@ public class BookingController {
             return "redirect:/login";
         }
 
-        bookingService.cancelBooking(id);
+        Booking booking = bookingService.cancelBooking(id);
+
+        // Send cancellation email
+        if (booking != null) {
+            try {
+                System.out.println("📧 Attempting to send cancellation email to: " + user.getEmail());
+                emailService.sendBookingCancellation(booking, user);
+                System.out.println("✅ Cancellation email sent to: " + user.getEmail());
+            } catch (Exception e) {
+                System.err.println("❌ Cancellation email failed: " + e.getMessage());
+            }
+        }
+
         return "redirect:/my-bookings";
     }
 

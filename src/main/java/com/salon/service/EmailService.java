@@ -28,6 +28,21 @@ public class EmailService {
         }
     }
 
+
+    // Calls the method cancellation
+    public void sendBookingCancellation(Booking booking, User customer) {
+        if (!emailEnabled) {
+            System.out.println("📧 Email disabled - would send cancellation to: " + customer.getEmail());
+            return;
+        }
+
+        if (brevoEmailService != null) {
+            brevoEmailService.sendBookingCancellation(booking, customer);
+        } else {
+            System.out.println("❌ No email service available");
+        }
+    }
+
     public void sendReminder(Booking booking, User customer) {
         if (!emailEnabled || brevoEmailService == null) {
             return;

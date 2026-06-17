@@ -114,8 +114,23 @@ public class CustomerController {
     }
 
     @GetMapping("/cancel/{id}")
-    public String cancelBooking(@PathVariable Long id) {
-        bookingService.cancelBooking(id);
+    public String cancelBooking(@PathVariable Long id, HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) return "redirect:/login";
+
+        Booking booking = bookingService.cancelBooking(id);
+
+        // Send cancellation email
+        if (booking != null) {
+            try {
+                System.out.println("📧 Attempting to send cancellation email to: " + user.getEmail());
+                emailService.sendBookingCancellation(booking, user);
+                System.out.println("✅ Cancellation email sent to: " + user.getEmail());
+            } catch (Exception e) {
+                System.err.println("❌ Cancellation email failed: " + e.getMessage());
+            }
+        }
+
         return "redirect:/customer/dashboard";
     }
 

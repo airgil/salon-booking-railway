@@ -44,14 +44,13 @@ public class BookingService {
         return bookingRepository.findAll();
     }
 
-    public boolean cancelBooking(Long bookingId) {
+    public Booking cancelBooking(Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId).orElse(null);
-        if (booking != null && "pending".equals(booking.getStatus())) {
+        if (booking != null && ("pending".equals(booking.getStatus()) || "confirmed".equals(booking.getStatus()))) {
             booking.setStatus("cancelled");
-            bookingRepository.save(booking);
-            return true;
+            return bookingRepository.save(booking);
         }
-        return false;
+        return null;
     }
 
     public boolean updateStatus(Long bookingId, String status) {
@@ -63,6 +62,8 @@ public class BookingService {
         }
         return false;
     }
+
+
 
     public List<Booking> getTodayBookings() {
         return bookingRepository.findByDate(LocalDate.now());
