@@ -24,6 +24,26 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByStaffAndDateAndTime(Staff staff, LocalDate date, LocalTime time);
     List<Booking> findByStatus(String status);
 
+    // Find bookings by user and status
+    List<Booking> findByUserAndStatus(User user, String status);
+
+    // Find bookings by user and date range
+    List<Booking> findByUserAndDateBetween(User user, LocalDate startDate, LocalDate endDate);
+
+    // Find bookings by user, status, and date range
+    @Query("SELECT b FROM Booking b WHERE b.user = :user AND b.status = :status AND b.date BETWEEN :startDate AND :endDate ORDER BY b.date DESC, b.time DESC")
+    List<Booking> findByUserAndStatusAndDateBetween(
+            @Param("user") User user,
+            @Param("status") String status,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
+
+    // Get distinct statuses for filter dropdown
+    @Query("SELECT DISTINCT b.status FROM Booking b WHERE b.user = :user ORDER BY b.status")
+    List<String> findDistinctStatusesByUser(@Param("user") User user);
+
+
     // For reminders - get confirmed bookings for a specific date
     @Query("SELECT b FROM Booking b WHERE b.date = :date AND b.status = 'confirmed'")
     List<Booking> findConfirmedBookingsByDate(@Param("date") LocalDate date);

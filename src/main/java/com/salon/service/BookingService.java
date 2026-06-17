@@ -40,6 +40,61 @@ public class BookingService {
         return bookingRepository.findByUserOrderByDateDesc(user);
     }
 
+
+    // NEW: Get bookings with filters
+    public List<Booking> getUserBookingsWithFilter(User user, String status, String dateRange) {
+        LocalDate startDate = null;
+        LocalDate endDate = null;
+
+        // Parse date range
+        if (dateRange != null && !dateRange.isEmpty()) {
+            LocalDate today = LocalDate.now();
+            switch (dateRange) {
+                case "today":
+                    startDate = today;
+                    endDate = today;
+                    break;
+                case "this-week":
+                    startDate = today.minusDays(today.getDayOfWeek().getValue() - 1);
+                    endDate = startDate.plusDays(6);
+                    break;
+                case "this-month":
+                    startDate = today.withDayOfMonth(1);
+                    endDate = today.withDayOfMonth(today.lengthOfMonth());
+                    break;
+                case "last-month":
+                    startDate = today.minusMonths(1).withDayOfMonth(1);
+                    endDate = today.minusMonths(1).withDayOfMonth(today.minusMonths(1).lengthOfMonth());
+                    break;
+                case "all":
+                default:
+                    startDate = null;
+                    endDate = null;
+                    break;
+            }
+        }
+
+        if (status != null && !status.isEmpty() && !"all".equals(status)) {
+            if (startDate != null && endDate != null) {
+                return bookingRepository.findByUserAndStatusAndDateBetween(user, status, startDate, endDate);
+            } else if (startDate != null) {
+                return bookingRepository.findByUserAndDateBetween(user, startDate, endDate);
+            } else {
+                return bookingRepository.findByUserAndStatus(user, status);
+            }
+        } else {
+            if (startDate != null && endDate != null) {
+                return bookingRepository.findByUserAndDateBetween(user, startDate, endDate);
+            } else {
+                return bookingRepository.findByUserOrderByDateDesc(user);
+            }
+        }
+    }
+
+    public List<String> getUserBookingStatuses(User user) {
+        return bookingRepository.findDistinctStatusesByUser(user);
+    }
+
     public List<Booking> getAllBookings() {
         return bookingRepository.findAll();
     }

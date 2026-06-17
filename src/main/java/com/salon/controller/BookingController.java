@@ -105,15 +105,39 @@ public class BookingController {
         }
     }
 
+    // UPDATED: My Bookings with filters
     @GetMapping("/my-bookings")
-    public String myBookings(Model model, HttpSession session) {
+    public String myBookings(@RequestParam(required = false) String status,
+                             @RequestParam(required = false) String dateRange,
+                             Model model, HttpSession session) {
         User user = (User) session.getAttribute("user");
         if (user == null) {
             return "redirect:/login";
         }
 
-        List<Booking> bookings = bookingRepository.findByUserOrderByDateDesc(user);
+        // Get bookings with filters
+        List<Booking> bookings = bookingService.getUserBookingsWithFilter(user, status, dateRange);
+
+        // Get all statuses for filter dropdown
+        List<String> statuses = bookingService.getUserBookingStatuses(user);
+        statuses.add(0, "all");
+
+        // Count bookings by status
+        long totalBookings = bookings.size();
+        long pendingCount = bookings.stream().filter(b -> "pending".equals(b.getStatus())).count();
+        long confirmedCount = bookings.stream().filter(b -> "confirmed".equals(b.getStatus())).count();
+        long completedCount = bookings.stream().filter(b -> "completed".equals(b.getStatus())).count();
+        long cancelledCount = bookings.stream().filter(b -> "cancelled".equals(b.getStatus())).count();
+
         model.addAttribute("bookings", bookings);
+        model.addAttribute("statuses", statuses);
+        model.addAttribute("selectedStatus", status);
+        model.addAttribute("selectedDateRange", dateRange);
+        model.addAttribute("totalBookings", totalBookings);
+        model.addAttribute("pendingCount", pendingCount);
+        model.addAttribute("confirmedCount", confirmedCount);
+        model.addAttribute("completedCount", completedCount);
+        model.addAttribute("cancelledCount", cancelledCount);
 
         return "my-bookings";
     }
