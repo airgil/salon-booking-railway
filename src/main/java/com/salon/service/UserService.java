@@ -26,24 +26,6 @@ public class UserService {
         return true;
     }
 
-    // ADD THIS METHOD
-    public boolean updateUserProfile(User updatedUser) {
-        Optional<User> optionalUser = userRepository.findById(updatedUser.getId());
-        if (optionalUser.isEmpty()) {
-            return false;
-        }
-
-        User existingUser = optionalUser.get();
-
-        // Update fields (except password, username, role)
-        existingUser.setFullName(updatedUser.getFullName());
-        existingUser.setEmail(updatedUser.getEmail());
-        existingUser.setPhone(updatedUser.getPhone());
-
-        userRepository.save(existingUser);
-        return true;
-    }
-
     public User login(String username, String password) {
         Optional<User> user = userRepository.findByUsernameAndPassword(username, password);
         return user.orElse(null);
