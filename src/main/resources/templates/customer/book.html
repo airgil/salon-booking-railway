@@ -4,6 +4,51 @@
     <meta charset="UTF-8">
     <title>Book Appointment</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .time-slot {
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            display: inline-block;
+            min-width: 80px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .time-slot.available {
+            background-color: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+        .time-slot.available:hover {
+            background-color: #28a745;
+            color: white;
+        }
+        .time-slot.booked {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        .time-slot.selected {
+            background-color: #007bff;
+            border-color: #0056b3;
+            color: white;
+        }
+        .time-slot-label {
+            font-size: 14px;
+        }
+        #selectedTimeDisplay {
+            font-weight: bold;
+            color: #28a745;
+        }
+        .loading {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+    </style>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -18,18 +63,19 @@
 
 <div class="container mt-4">
     <div class="row justify-content-center">
-        <div class="col-md-6">
+        <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    <h4>Book an Appointment</h4>
+                    <h4>📅 Book an Appointment</h4>
                 </div>
                 <div class="card-body">
                     <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-                    <form action="/customer/book" method="post">
+                    <form id="bookingForm" action="/customer/book" method="post">
                         <div class="mb-3">
                             <label class="form-label">Select Service</label>
-                            <select name="serviceId" class="form-control" required>
+                            <select name="serviceId" id="serviceId" class="form-control" required>
+                                <option value="">-- Select a Service --</option>
                                 <option th:each="service : ${services}"
                                         th:value="${service.id}"
                                         th:text="${service.serviceName} + ' - $' + ${service.price} + ' (' + ${service.duration} + ' min)'">
@@ -39,7 +85,8 @@
 
                         <div class="mb-3">
                             <label class="form-label">Select Staff</label>
-                            <select name="staffId" class="form-control" required>
+                            <select name="staffId" id="staffId" class="form-control" required>
+                                <option value="">-- Select a Staff Member --</option>
                                 <option th:each="staff : ${staff}"
                                         th:value="${staff.id}"
                                         th:text="${staff.staffName} + ' - ' + ${staff.specialty}">
@@ -48,29 +95,217 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Date</label>
-                            <input type="date" name="date" class="form-control" required>
+                            <label class="form-label">Select Date</label>
+                            <input type="date" name="date" id="bookingDate" class="form-control"
+                                   th:min="${today}" required>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Time</label>
-                            <select name="time" class="form-control" required>
-                                <option value="09:00:00">09:00 AM</option>
-                                <option value="10:00:00">10:00 AM</option>
-                                <option value="11:00:00">11:00 AM</option>
-                                <option value="14:00:00">02:00 PM</option>
-                                <option value="15:00:00">03:00 PM</option>
-                                <option value="16:00:00">04:00 PM</option>
-                                <option value="17:00:00">05:00 PM</option>
-                            </select>
+                            <label class="form-label">Select Time</label>
+                            <div id="timeSlotsContainer" class="mt-2">
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle"></i>
+                                    Please select a service, staff, and date to see available time slots.
+                                </div>
+                            </div>
+                            <input type="hidden" name="time" id="selectedTime" required>
+                            <div id="selectedTimeDisplay" class="mt-2"></div>
                         </div>
 
-                        <button type="submit" class="btn btn-primary w-100">Book Appointment</button>
+                        <button type="submit" id="bookButton" class="btn btn-primary w-100" disabled>
+                            Book Appointment
+                        </button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    // Get references to form elements
+    const serviceSelect = document.getElementById('serviceId');
+    const staffSelect = document.getElementById('staffId');
+    const dateInput = document.getElementById('bookingDate');
+    const timeSlotsContainer = document.getElementById('timeSlotsContainer');
+    const selectedTimeInput = document.getElementById('selectedTime');
+    const selectedTimeDisplay = document.getElementById('selectedTimeDisplay');
+    const bookButton = document.getElementById('bookButton');
+
+    // State
+    let selectedTime = null;
+
+    // Add event listeners
+    serviceSelect.addEventListener('change', loadTimeSlots);
+    staffSelect.addEventListener('change', loadTimeSlots);
+    dateInput.addEventListener('change', loadTimeSlots);
+
+    async function loadTimeSlots() {
+        const staffId = staffSelect.value;
+        const date = dateInput.value;
+
+        // Reset selection
+        selectedTime = null;
+        selectedTimeInput.value = '';
+        selectedTimeDisplay.innerHTML = '';
+        bookButton.disabled = true;
+
+        // Validate inputs
+        if (!staffId || !date) {
+            timeSlotsContainer.innerHTML = `
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+                    Please select a staff member and date to see available time slots.
+                </div>
+            `;
+            return;
+        }
+
+        // Check if date is in the past
+        const today = new Date().toISOString().split('T')[0];
+        if (date < today) {
+            timeSlotsContainer.innerHTML = `
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    Cannot book on past dates. Please select a future date.
+                </div>
+            `;
+            return;
+        }
+
+        // Show loading
+        timeSlotsContainer.innerHTML = `
+            <div class="alert alert-info">
+                <i class="bi bi-spinner bi-spin"></i>
+                Loading available time slots...
+            </div>
+        `;
+        timeSlotsContainer.classList.add('loading');
+
+        try {
+            const response = await fetch(`/customer/get-available-slots?staffId=${staffId}&date=${date}`);
+            const slots = await response.json();
+
+            timeSlotsContainer.classList.remove('loading');
+
+            if (slots.length === 0) {
+                timeSlotsContainer.innerHTML = `
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        No available time slots for this staff on this date.
+                        Please try a different date or staff member.
+                    </div>
+                `;
+                return;
+            }
+
+            // Generate time slot buttons
+            let html = `
+                <div class="mb-2">
+                    <strong>Available Time Slots:</strong>
+                    <span class="badge bg-success">${slots.length} available</span>
+                </div>
+                <div class="d-flex flex-wrap">
+            `;
+
+            slots.forEach(time => {
+                const timeDisplay = formatTime(time);
+                html += `
+                    <div class="time-slot available" data-time="${time}" onclick="selectTimeSlot('${time}')">
+                        ${timeDisplay}
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            html += `
+                <div class="mt-2 small text-muted">
+                    <span class="badge bg-success">●</span> Available
+                    <span class="badge bg-secondary" style="opacity:0.3;">●</span> Booked
+                </div>
+            `;
+
+            timeSlotsContainer.innerHTML = html;
+
+        } catch (error) {
+            console.error('Error loading time slots:', error);
+            timeSlotsContainer.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-circle"></i>
+                    Failed to load time slots. Please try again.
+                </div>
+            `;
+        }
+    }
+
+    function selectTimeSlot(time) {
+        // Deselect previous
+        document.querySelectorAll('.time-slot.available').forEach(el => {
+            el.classList.remove('selected');
+        });
+
+        // Select clicked
+        const slotElement = document.querySelector(`.time-slot[data-time="${time}"]`);
+        if (slotElement) {
+            slotElement.classList.add('selected');
+        }
+
+        // Update selection
+        selectedTime = time;
+        selectedTimeInput.value = time;
+        selectedTimeDisplay.innerHTML = `
+            <span class="badge bg-success">Selected Time: ${formatTime(time)}</span>
+        `;
+        bookButton.disabled = false;
+    }
+
+    function formatTime(timeString) {
+        const [hours, minutes] = timeString.split(':');
+        const h = parseInt(hours);
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        const h12 = h % 12 || 12;
+        return `${h12}:${minutes} ${ampm}`;
+    }
+
+    // Set default date to tomorrow
+    document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        dateInput.value = tomorrow.toISOString().split('T')[0];
+
+        // Load initial time slots if staff is selected
+        if (staffSelect.value && dateInput.value) {
+            loadTimeSlots();
+        }
+    });
+
+    // Prevent booking on past dates
+    dateInput.addEventListener('change', function() {
+        const today = new Date().toISOString().split('T')[0];
+        if (this.value < today) {
+            alert('Cannot book on past dates. Please select a future date.');
+            this.value = today;
+            loadTimeSlots();
+        }
+    });
+
+    // Ensure service is selected before booking
+    document.getElementById('bookingForm').addEventListener('submit', function(e) {
+        if (!serviceSelect.value) {
+            e.preventDefault();
+            alert('Please select a service.');
+            return false;
+        }
+        if (!selectedTime) {
+            e.preventDefault();
+            alert('Please select a time slot.');
+            return false;
+        }
+        return true;
+    });
+</script>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet">
 </body>
 </html>

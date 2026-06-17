@@ -8,6 +8,7 @@ import com.salon.repository.ServiceRepository;
 import com.salon.repository.StaffRepository;
 import com.salon.service.BookingService;
 import com.salon.service.EmailService;  // ← ADD THIS IMPORT
+import com.salon.service.TimeSlotService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -34,6 +35,9 @@ public class CustomerController {
     @Autowired
     private EmailService emailService;  // ← ADD THIS
 
+    @Autowired
+    private TimeSlotService timeSlotService;  // ADD THIS
+
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session, Model model) {
         User user = (User) session.getAttribute("user");
@@ -53,6 +57,28 @@ public class CustomerController {
         model.addAttribute("staff", staff);
         return "customer/book";
     }
+
+
+    // NEW: Get available time slots via AJAX
+    @GetMapping("/get-available-slots")
+    @ResponseBody
+    public List<String> getAvailableSlots(@RequestParam Long staffId,
+                                          @RequestParam String date) {
+        LocalDate bookingDate = LocalDate.parse(date);
+
+        // Check if date is in the past
+        if (bookingDate.isBefore(LocalDate.now())) {
+            return List.of();
+        }
+
+        List<LocalTime> availableSlots = timeSlotService.getAvailableTimeSlots(staffId, bookingDate);
+
+        // Convert to string format for JSON response
+        return availableSlots.stream()
+                .map(time -> time.toString())
+                .toList();
+    }
+
 
     @PostMapping("/book")
     public String createBooking(@RequestParam Long serviceId,
@@ -81,6 +107,15 @@ public class CustomerController {
             model.addAttribute("error", "Cannot book on past dates");
             return "customer/book";
         }
+
+        // Check if time slot is available
+        if (!timeSlotService.isTimeSlotAvailable(staffId, bookingDate, bookingTime)) {
+            model.addAttribute("error", "Time slot not available");
+            model.addAttribute("services", serviceRepository.findByActiveTrue());
+            model.addAttribute("staff", staffRepository.findByIsAvailableTrue());
+            return "customer/book";
+        }
+
 
         if (!bookingService.isTimeSlotAvailable(staffId, bookingDate, bookingTime)) {
             model.addAttribute("error", "Time slot not available");

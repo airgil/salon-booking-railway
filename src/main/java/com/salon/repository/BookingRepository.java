@@ -47,4 +47,19 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("time") LocalTime time,
             @Param("status") String status
     );
+
+    // Get booked times for a specific staff on a specific date
+    @Query("SELECT b.time FROM Booking b WHERE b.staff.id = :staffId AND b.date = :date AND b.status != 'cancelled'")
+    List<LocalTime> findBookedTimesByStaffAndDate(
+            @Param("staffId") Long staffId,
+            @Param("date") LocalDate date
+    );
+
+    // Get all bookings for a staff on a specific date
+    @Query("SELECT b FROM Booking b WHERE b.staff.id = :staffId AND b.date = :date AND b.status != 'cancelled'")
+    List<Booking> findBookingsByStaffAndDate(
+            @Param("staffId") Long staffId,
+            @Param("date") LocalDate date
+    );
+
 }
