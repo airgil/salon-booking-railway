@@ -38,6 +38,26 @@ public class CustomerController {
     @Autowired
     private TimeSlotService timeSlotService;  // ADD THIS
 
+    @GetMapping("/profile")
+    public String profile(HttpSession session, Model model) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/login";
+        }
+        model.addAttribute("user", user);
+        return "customer/profile";
+    }
+
+    @PostMapping("/profile/update")
+    public String updateProfile(@RequestParam String fullName,
+                                @RequestParam String email,
+                                @RequestParam String phone,
+                                HttpSession session,
+                                Model model) {
+        // ... update logic
+        return "customer/profile";
+    }
+
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session, Model model) {
         User user = (User) session.getAttribute("user");
