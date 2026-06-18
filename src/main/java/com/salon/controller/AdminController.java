@@ -175,6 +175,33 @@ public class AdminController {
         return "redirect:/admin/staff";
     }
 
+
+    // ADD THIS METHOD - Delete Staff
+    @GetMapping("/staff/delete/{id}")
+    public String deleteStaff(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        System.out.println("========================================");
+        System.out.println("🗑️ Deleting staff with ID: " + id);
+        System.out.println("========================================");
+
+        try {
+            Staff staff = staffRepository.findById(id).orElse(null);
+            if (staff != null) {
+                staffRepository.deleteById(id);
+                System.out.println("✅ Staff deleted successfully: " + staff.getStaffName());
+                redirectAttributes.addFlashAttribute("success", "Staff member deleted successfully!");
+            } else {
+                System.out.println("❌ Staff not found with ID: " + id);
+                redirectAttributes.addFlashAttribute("error", "Staff member not found!");
+            }
+        } catch (Exception e) {
+            System.err.println("❌ Failed to delete staff: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Failed to delete staff: " + e.getMessage());
+        }
+
+        return "redirect:/admin/staff";
+    }
+
+
     @GetMapping("/reports")
     public String reports(Model model) {
         List<Booking> bookings = bookingService.getAllBookings();
@@ -197,6 +224,7 @@ public class AdminController {
 
         return "admin/reports";
     }
+
 
 
 

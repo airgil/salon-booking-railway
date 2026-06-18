@@ -526,12 +526,25 @@
 
 </div>
 
+
+<!-- Success/Error Messages -->
+<div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="bi bi-check-circle-fill me-2"></i>
+    <span th:text="${success}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+<div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-circle-fill me-2"></i>
+    <span th:text="${error}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+
 <!-- ===== FOOTER ===== -->
 <footer class="footer">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-md-6 text-center text-md-start">
-                <p class="mb-0">© 2026 Salon Booking System. All rights reserved.</p>
+                <p class="mb-0">© 2026 All Day Salon Developed By: Airgilstudio™. All rights reserved.</p>
             </div>
             <div class="col-md-6 text-center text-md-end">
                 <small>
