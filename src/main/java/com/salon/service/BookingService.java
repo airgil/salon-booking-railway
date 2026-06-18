@@ -123,7 +123,28 @@ public class BookingService {
         return false;
     }
 
+    // Reassign bookings from one staff to another
+    public int reassignBookings(Long oldStaffId, Long newStaffId) {
+        Staff oldStaff = staffRepository.findById(oldStaffId).orElse(null);
+        Staff newStaff = staffRepository.findById(newStaffId).orElse(null);
 
+        if (oldStaff == null || newStaff == null) {
+            return 0;
+        }
+
+        List<Booking> bookings = bookingRepository.findByStaff(oldStaff);
+        int count = bookings.size();
+
+        for (Booking booking : bookings) {
+            booking.setStaff(newStaff);
+            bookingRepository.save(booking);
+        }
+
+        // Delete the old staff after reassignment
+        staffRepository.deleteById(oldStaffId);
+
+        return count;
+    }
 
 
     public List<Booking> getTodayBookings() {
