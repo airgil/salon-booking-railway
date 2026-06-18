@@ -324,6 +324,29 @@
             font-size: 14px;
         }
 
+
+        .service-icon {
+            width: 70px;
+            height: 70px;
+            background: rgba(108, 99, 255, 0.15);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 30px;
+            color: var(--primary);
+            transition: all 0.3s;
+        }
+
+        .service-card:hover .service-icon {
+            background: var(--primary);
+            color: #fff;
+            transform: rotate(10deg) scale(1.1);
+        }
+
+
+
         /* ===== FEATURES SECTION ===== */
         .features-section {
             padding: 80px 0;
@@ -561,7 +584,7 @@
 <!-- ===== NAVBAR ===== -->
 <nav class="navbar navbar-expand-lg fixed-top">
     <div class="container">
-        <a class="navbar-brand" href="/">✂️ Salon<span>Booking</span></a>
+        <a class="navbar-brand" href="/">✂️ All Day<span>Salon</span></a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -641,8 +664,40 @@
         <div class="row">
             <div class="col-md-4 mb-4" th:each="service : ${services}">
                 <div class="service-card">
-                    <div class="service-icon">
-                        <i class="bi bi-scissors"></i>
+                    <div class="service-icon" th:switch="${service.serviceName}">
+                        <!-- Hair Services -->
+                        <i th:case="'Haircut'" class="bi bi-scissors"></i>
+                        <i th:case="'Hair Coloring'" class="bi bi-palette"></i>
+                        <i th:case="'Hair Styling'" class="bi bi-magic"></i>
+                        <i th:case="'Blow Dry'" class="bi bi-wind"></i>
+                        <i th:case="'Hair Treatment'" class="bi bi-droplet"></i>
+
+                        <!-- Nail Services -->
+                        <i th:case="'Manicure'" class="bi bi-hand-index-thumb"></i>
+                        <i th:case="'Pedicure'" class="bi bi-hand-index"></i>
+                        <i th:case="'Nail Art'" class="bi bi-brush"></i>
+                        <i th:case="'Gel Nails'" class="bi bi-lightbulb"></i>
+
+                        <!-- Facial & Skincare -->
+                        <i th:case="'Facial'" class="bi bi-emoji-smile"></i>
+                        <i th:case="'Deep Cleansing'" class="bi bi-droplet"></i>
+                        <i th:case="'Skin Treatment'" class="bi bi-star"></i>
+                        <i th:case="'Anti-Aging'" class="bi bi-clock"></i>
+
+                        <!-- Massage -->
+                        <i th:case="'Massage'" class="bi bi-heart-pulse"></i>
+                        <i th:case="'Deep Tissue'" class="bi bi-activity"></i>
+                        <i th:case="'Reflexology'" class="bi bi-foot"></i>
+                        <i th:case="'Hot Stone'" class="bi bi-fire"></i>
+
+                        <!-- Waxing & Grooming -->
+                        <i th:case="'Waxing'" class="bi bi-snow"></i>
+                        <i th:case="'Threading'" class="bi bi-dot"></i>
+                        <i th:case="'Shave'" class="bi bi-razor"></i>
+                        <i th:case="'Full Facial Shave'" class="bi bi-razor"></i>
+
+                        <!-- Default -->
+                        <i th:case="*" class="bi bi-star"></i>
                     </div>
                     <h5 th:text="${service.serviceName}">Service Name</h5>
                     <p th:text="${service.description}">Service description</p>
@@ -658,6 +713,8 @@
         </div>
     </div>
 </section>
+
+
 
 <!-- ===== FEATURES SECTION ===== -->
 <section class="features-section" id="features">
@@ -856,13 +913,13 @@
             </div>
             <div class="col-md-3 mb-4">
                 <h5>Contact</h5>
-                <p style="color: rgba(255,255,255,0.4);"><i class="bi bi-envelope"></i> support@salonbooking.com</p>
-                <p style="color: rgba(255,255,255,0.4);"><i class="bi bi-phone"></i> +1 (555) 123-4567</p>
-                <p style="color: rgba(255,255,255,0.4);"><i class="bi bi-geo-alt"></i> 123 Salon St, NY 10001</p>
+                <p style="color: rgba(255,255,255,0.4);"><i class="bi bi-envelope"></i>airgil@airgilstudio.online</p>
+                <p style="color: rgba(255,255,255,0.4);"><i class="bi bi-phone"></i> +63 (555) 123-4567</p>
+                <p style="color: rgba(255,255,255,0.4);"><i class="bi bi-geo-alt"></i> Camella Homes Talisay Cebu</p>
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2026 SalonBooking. All rights reserved. Made with <i class="bi bi-heart-fill" style="color: var(--secondary);"></i></p>
+            <p>&copy; 2026 All Day Salon Developed By: Airgilstudio™. All rights reserved. Made with <i class="bi bi-heart-fill" style="color: var(--secondary);"></i></p>
         </div>
     </div>
 </footer>
