@@ -145,6 +145,17 @@ public class AdminController {
         return "redirect:/admin/staff";
     }
 
+    // ADD THIS METHOD - Toggle Staff Availability
+    @PostMapping("/staff/toggle/{id}")
+    public String toggleStaffAvailability(@PathVariable Long id) {
+        Staff staff = staffRepository.findById(id).orElse(null);
+        if (staff != null) {
+            staff.setIsAvailable(!staff.getIsAvailable());
+            staffRepository.save(staff);
+        }
+        return "redirect:/admin/staff";
+    }
+
     @GetMapping("/reports")
     public String reports(Model model) {
         List<Booking> bookings = bookingService.getAllBookings();
@@ -167,4 +178,6 @@ public class AdminController {
 
         return "admin/reports";
     }
+
+
 }
