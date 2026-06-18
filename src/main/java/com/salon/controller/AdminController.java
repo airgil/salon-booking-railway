@@ -11,7 +11,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/admin")
@@ -41,34 +43,63 @@ public class AdminController {
     }
 
     @GetMapping("/bookings")
-    public String bookings(Model model) {
-        List<Booking> bookings = bookingService.getAllBookings();
+    public String bookings(@RequestParam(required = false) String status,
+                           @RequestParam(required = false) String dateFrom,
+                           @RequestParam(required = false) String dateTo,
+                           Model model) {
+        List<Booking> allBookings = bookingService.getAllBookings();
+        List<Booking> filteredBookings = allBookings;
 
-        // Calculate statistics
-        int totalBookings = bookings.size();
-        int pendingCount = (int) bookings.stream()
+        // Apply status filter
+        if (status != null && !status.isEmpty() && !"all".equals(status)) {
+            filteredBookings = filteredBookings.stream()
+                    .filter(b -> status.equals(b.getStatus()))
+                    .collect(Collectors.toList());
+        }
+
+        // Apply date from filter
+        if (dateFrom != null && !dateFrom.isEmpty()) {
+            LocalDate fromDate = LocalDate.parse(dateFrom);
+            filteredBookings = filteredBookings.stream()
+                    .filter(b -> b.getDate().isAfter(fromDate.minusDays(1)))
+                    .collect(Collectors.toList());
+        }
+
+        // Apply date to filter
+        if (dateTo != null && !dateTo.isEmpty()) {
+            LocalDate toDate = LocalDate.parse(dateTo);
+            filteredBookings = filteredBookings.stream()
+                    .filter(b -> b.getDate().isBefore(toDate.plusDays(1)))
+                    .collect(Collectors.toList());
+        }
+
+        // Calculate statistics from all bookings (not filtered)
+        int totalBookings = allBookings.size();
+        int pendingCount = (int) allBookings.stream()
                 .filter(b -> "pending".equals(b.getStatus()))
                 .count();
-        int confirmedCount = (int) bookings.stream()
+        int confirmedCount = (int) allBookings.stream()
                 .filter(b -> "confirmed".equals(b.getStatus()))
                 .count();
-        int completedCount = (int) bookings.stream()
+        int completedCount = (int) allBookings.stream()
                 .filter(b -> "completed".equals(b.getStatus()))
                 .count();
-        int cancelledCount = (int) bookings.stream()
+        int cancelledCount = (int) allBookings.stream()
                 .filter(b -> "cancelled".equals(b.getStatus()))
                 .count();
 
-        model.addAttribute("bookings", bookings);
+        model.addAttribute("bookings", filteredBookings);
         model.addAttribute("totalBookings", totalBookings);
         model.addAttribute("pendingCount", pendingCount);
         model.addAttribute("confirmedCount", confirmedCount);
         model.addAttribute("completedCount", completedCount);
         model.addAttribute("cancelledCount", cancelledCount);
+        model.addAttribute("selectedStatus", status);
+        model.addAttribute("selectedDateFrom", dateFrom);
+        model.addAttribute("selectedDateTo", dateTo);
 
         return "admin/bookings";
     }
-
 
     @PostMapping("/booking/update")
     public String updateBookingStatus(@RequestParam Long id, @RequestParam String status) {
@@ -103,20 +134,15 @@ public class AdminController {
 
     @PostMapping("/staff/add")
     public String addStaff(@ModelAttribute Staff staff) {
-        // Use either setAvailable or setIsAvailable based on your Staff entity
-        staff.setIsAvailable(true);  // ← Use this if your entity has setIsAvailable
-        // OR
-        // staff.setAvailable(true);  // ← Use this if you added the setAvailable method
+        staff.setIsAvailable(true);
         staffRepository.save(staff);
         return "redirect:/admin/staff";
     }
 
     @GetMapping("/reports")
     public String reports(Model model) {
-        // Get all bookings
         List<Booking> bookings = bookingService.getAllBookings();
 
-        // Calculate statistics
         int totalBookings = bookings.size();
         int completedCount = (int) bookings.stream()
                 .filter(b -> "completed".equals(b.getStatus()))
@@ -128,7 +154,6 @@ public class AdminController {
                 .filter(b -> "cancelled".equals(b.getStatus()))
                 .count();
 
-        // Add to model
         model.addAttribute("totalBookings", totalBookings);
         model.addAttribute("completedCount", completedCount);
         model.addAttribute("pendingCount", pendingCount);
