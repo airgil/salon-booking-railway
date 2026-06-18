@@ -177,42 +177,37 @@ public class AdminController {
 
 
     // ADD THIS METHOD - Delete Staff
+    // Updated delete staff method - redirects to reassign if bookings exist
     @GetMapping("/staff/delete/{id}")
     public String deleteStaff(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        System.out.println("========================================");
-        System.out.println("🗑️ Deleting staff with ID: " + id);
-        System.out.println("========================================");
+        Staff staff = staffRepository.findById(id).orElse(null);
 
+        if (staff == null) {
+            redirectAttributes.addFlashAttribute("error", "Staff member not found!");
+            return "redirect:/admin/staff";
+        }
+
+        // Check if staff has bookings
+        List<Booking> bookings = bookingService.getBookingsByStaff(staff);
+
+        if (!bookings.isEmpty()) {
+            // Redirect to reassign page
+            redirectAttributes.addFlashAttribute("info",
+                    "Staff member '" + staff.getStaffName() +
+                            "' has " + bookings.size() + " existing bookings. Please reassign them first.");
+            return "redirect:/admin/staff/reassign/" + id;
+        }
+
+        // No bookings, safe to delete
         try {
-            Staff staff = staffRepository.findById(id).orElse(null);
-            if (staff == null) {
-                redirectAttributes.addFlashAttribute("error", "Staff member not found!");
-                return "redirect:/admin/staff";
-            }
-
-            // Check if staff has bookings
-            List<Booking> bookings = bookingService.getBookingsByStaff(staff);
-            if (!bookings.isEmpty()) {
-                System.out.println("⚠️ Staff has " + bookings.size() + " bookings. Cannot delete.");
-                redirectAttributes.addFlashAttribute("error",
-                        "Cannot delete staff member '" + staff.getStaffName() +
-                                "' because they have " + bookings.size() + " existing bookings. " +
-                                "Please reassign or cancel these bookings first.");
-                return "redirect:/admin/staff";
-            }
-
             staffRepository.deleteById(id);
-            System.out.println("✅ Staff deleted successfully: " + staff.getStaffName());
             redirectAttributes.addFlashAttribute("success", "Staff member deleted successfully!");
-
         } catch (Exception e) {
-            System.err.println("❌ Failed to delete staff: " + e.getMessage());
             redirectAttributes.addFlashAttribute("error", "Failed to delete staff: " + e.getMessage());
         }
 
         return "redirect:/admin/staff";
     }
-
 
     @GetMapping("/reports")
     public String reports(Model model) {

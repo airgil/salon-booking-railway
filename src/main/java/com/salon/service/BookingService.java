@@ -40,6 +40,11 @@ public class BookingService {
         return bookingRepository.findByUserOrderByDateDesc(user);
     }
 
+    public List<Booking> getBookingsByStaff(Staff staff) {
+        return bookingRepository.findByStaff(staff);
+    }
+
+
 
     // NEW: Get bookings with filters
     public List<Booking> getUserBookingsWithFilter(User user, String status, String dateRange) {
@@ -118,9 +123,6 @@ public class BookingService {
         return false;
     }
 
-    public List<Booking> getBookingsByStaff(Staff staff) {
-        return bookingRepository.findByStaff(staff);
-    }
 
 
 
