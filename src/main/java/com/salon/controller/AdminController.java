@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -126,9 +127,27 @@ public class AdminController {
         return "redirect:/admin/services";
     }
 
-    @GetMapping("/service/delete/{id}")
+/*    @GetMapping("/service/delete/{id}")
     public String deleteService(@PathVariable Long id) {
         serviceRepository.deleteById(id);
+        return "redirect:/admin/services";
+    }*/
+
+    @GetMapping("/service/delete/{id}")
+    public String deleteService(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        System.out.println("========================================");
+        System.out.println("🗑️ Deleting service with ID: " + id);
+        System.out.println("========================================");
+
+        try {
+            serviceRepository.deleteById(id);
+            System.out.println("✅ Service deleted successfully");
+            redirectAttributes.addFlashAttribute("success", "Service deleted successfully!");
+        } catch (Exception e) {
+            System.err.println("❌ Failed to delete service: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Failed to delete service: " + e.getMessage());
+        }
+
         return "redirect:/admin/services";
     }
 
@@ -178,6 +197,10 @@ public class AdminController {
 
         return "admin/reports";
     }
+
+
+
+
 
 
 }
