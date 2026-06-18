@@ -4,7 +4,6 @@ import com.salon.model.User;
 import com.salon.service.UserService;
 import com.salon.service.EmailService;
 import com.salon.service.BrevoEmailService;
-import com.salon.util.RateLimiter;  // ← ADD THIS IMPORT
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.http.HttpServletRequest;  // ← ADD THIS IMPORT
 import javax.servlet.http.HttpSession;
 
 @Controller
@@ -27,9 +25,6 @@ public class AuthController {
 
     @Autowired(required = false)
     private BrevoEmailService brevoEmailService;
-
-    @Autowired
-    private RateLimiter rateLimiter;  // ← ADD THIS
 
     // ===== GET MAPPINGS =====
 
@@ -62,16 +57,8 @@ public class AuthController {
     @PostMapping("/login")
     public String doLogin(@RequestParam String username,
                           @RequestParam String password,
-                          HttpServletRequest request,  // ← ADD THIS
                           HttpSession session,
                           Model model) {
-        // Rate limiting - get client IP
-        String clientIp = request.getRemoteAddr();
-        if (!rateLimiter.allowRequest(clientIp)) {
-            model.addAttribute("error", "Too many login attempts. Please try again later.");
-            return "login";
-        }
-
         User user = userService.login(username, password);
 
         if (user != null) {
@@ -93,18 +80,6 @@ public class AuthController {
                              @RequestParam String email,
                              @RequestParam(required = false) String phone,
                              Model model) {
-        // Sanitize inputs
-        username = sanitizeInput(username);
-        fullName = sanitizeInput(fullName);
-        email = sanitizeInput(email);
-        phone = sanitizeInput(phone);
-
-        // Validate password strength
-        if (!isPasswordStrong(password)) {
-            model.addAttribute("error", "Password must be at least 8 characters with uppercase, lowercase, and numbers");
-            return "register";
-        }
-
         // Check if username already exists
         if (userService.findByUsername(username).isPresent()) {
             model.addAttribute("error", "Username already exists");
@@ -133,27 +108,6 @@ public class AuthController {
         return "register";
     }
 
-    // ===== HELPER METHODS =====
-
-    private String sanitizeInput(String input) {
-        if (input == null) return null;
-        // Remove HTML tags and script tags
-        return input.replaceAll("(?i)<script.*?>.*?</script.*?>", "")
-                .replaceAll("(?i)<.*?>", "")
-                .trim();
-    }
-
-    private boolean isPasswordStrong(String password) {
-        if (password == null || password.length() < 8) return false;
-
-        boolean hasUppercase = password.matches(".*[A-Z].*");
-        boolean hasLowercase = password.matches(".*[a-z].*");
-        boolean hasNumber = password.matches(".*[0-9].*");
-        boolean hasSpecial = password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?].*");
-
-        return hasUppercase && hasLowercase && hasNumber && hasSpecial;
-    }
-
     // ===== EMAIL TEST ENDPOINTS =====
 
     @GetMapping("/email-status")
@@ -172,14 +126,12 @@ public class AuthController {
         }
 
         try {
-            // Create a test booking
             com.salon.model.Booking testBooking = new com.salon.model.Booking();
             testBooking.setId(999L);
             testBooking.setDate(java.time.LocalDate.now());
             testBooking.setTime(java.time.LocalTime.now());
             testBooking.setStatus("test");
 
-            // Create a test user
             User testUser = new User();
             testUser.setEmail(email);
             testUser.setFullName("Test User");
