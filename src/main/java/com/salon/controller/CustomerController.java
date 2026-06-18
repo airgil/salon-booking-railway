@@ -154,7 +154,7 @@ public class CustomerController {
         return "redirect:/customer/dashboard";
     }
 
-    @GetMapping("/cancel/{id}")
+    @PostMapping("/cancel/{id}")
     public String cancelBooking(@PathVariable Long id, HttpSession session) {
         User user = (User) session.getAttribute("user");
         if (user == null) return "redirect:/login";
