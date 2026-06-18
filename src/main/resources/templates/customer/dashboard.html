@@ -566,27 +566,35 @@
                                 </div>
                             </div>
                             <div class="col-md-2">
-                                <span class="status-badge" th:classappend="${booking.status}" th:text="${booking.status}">
-                                    Status
-                                </span>
+                            <span class="status-badge" th:classappend="${booking.status}" th:text="${booking.status}">
+                                Status
+                            </span>
                             </div>
                             <div class="col-md-3 text-md-end mt-3 mt-md-0">
                                 <div class="btn-group btn-group-sm" role="group">
-                                    <a th:if="${booking.status == 'pending' or booking.status == 'confirmed'}"
-                                       th:href="@{/cancel-booking/{id}(id=${booking.id})}"
-                                       class="btn btn-outline-danger"
-                                       onclick="return confirm('Cancel this booking? This cannot be undone.')">
-                                        <i class="bi bi-x-circle"></i>
-                                    </a>
+                                    <!-- Cancel Button - POST form -->
+                                    <form th:action="@{/cancel-booking/{id}(id=${booking.id})}" method="post" style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                th:if="${booking.status == 'pending' or booking.status == 'confirmed'}"
+                                                onclick="return confirm('Cancel this booking? This cannot be undone.')">
+                                            <i class="bi bi-x-circle"></i>
+                                        </button>
+                                    </form>
+
+                                    <!-- Reschedule Button -->
                                     <a th:if="${booking.status == 'pending' or booking.status == 'confirmed'}"
                                        th:href="@{/reschedule-booking/{id}(id=${booking.id})}"
-                                       class="btn btn-outline-primary">
+                                       class="btn btn-sm btn-outline-primary">
                                         <i class="bi bi-arrow-repeat"></i>
                                     </a>
-                                    <a th:href="@{/qr/view/{id}(id=${booking.id})}" class="btn btn-outline-info">
+
+                                    <!-- QR Code Button -->
+                                    <a th:href="@{/qr/view/{id}(id=${booking.id})}" class="btn btn-sm btn-outline-info">
                                         <i class="bi bi-qr-code"></i>
                                     </a>
-                                    <a th:href="@{/my-bookings}" class="btn btn-outline-secondary">
+
+                                    <!-- View Button -->
+                                    <a th:href="@{/my-bookings}" class="btn btn-sm btn-outline-secondary">
                                         <i class="bi bi-eye"></i>
                                     </a>
                                 </div>
