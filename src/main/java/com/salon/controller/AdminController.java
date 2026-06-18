@@ -87,4 +87,13 @@ public class AdminController {
         staffRepository.save(staff);
         return "redirect:/admin/staff";
     }
+
+    @GetMapping("/reports")
+    public String reports(Model model) {
+        // Add any data you want to show
+        List<Booking> bookings = bookingService.getAllBookings();
+        model.addAttribute("totalBookings", bookings.size());
+        model.addAttribute("bookings", bookings);
+        return "admin/reports";
+    }
 }
