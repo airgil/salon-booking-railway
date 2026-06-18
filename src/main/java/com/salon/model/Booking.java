@@ -17,7 +17,7 @@ public class Booking {
 
     @ManyToOne
     @JoinColumn(name = "service_id")
-    private Service service;
+    private SalonService service;  // ← CHANGED from Service to SalonService
 
     @ManyToOne
     @JoinColumn(name = "staff_id")
@@ -40,8 +40,8 @@ public class Booking {
     public void setId(Long id) { this.id = id; }
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }
-    public Service getService() { return service; }
-    public void setService(Service service) { this.service = service; }
+    public SalonService getService() { return service; }  // ← CHANGED
+    public void setService(SalonService service) { this.service = service; }  // ← CHANGED
     public Staff getStaff() { return staff; }
     public void setStaff(Staff staff) { this.staff = staff; }
     public LocalDate getDate() { return date; }

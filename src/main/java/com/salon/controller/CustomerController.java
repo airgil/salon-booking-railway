@@ -1,7 +1,7 @@
 package com.salon.controller;
 
 import com.salon.model.Booking;
-import com.salon.model.Service;
+import com.salon.model.SalonService;
 import com.salon.model.Staff;
 import com.salon.model.User;
 import com.salon.repository.ServiceRepository;
@@ -75,7 +75,7 @@ public class CustomerController {
 
     @GetMapping("/book")
     public String bookPage(Model model) {
-        List<Service> services = serviceRepository.findByActiveTrue();
+        List<SalonService> services = serviceRepository.findByActiveTrue();
         List<Staff> staff = staffRepository.findByIsAvailableTrue();
         model.addAttribute("services", services);
         model.addAttribute("staff", staff);

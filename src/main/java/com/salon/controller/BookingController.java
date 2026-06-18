@@ -1,7 +1,6 @@
 package com.salon.controller;
 
 import com.salon.model.Booking;
-import com.salon.model.Service;
 import com.salon.model.Staff;
 import com.salon.model.User;
 import com.salon.repository.BookingRepository;
@@ -13,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
+import com.salon.model.SalonService;
 import javax.servlet.http.HttpSession;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -44,7 +43,7 @@ public class BookingController {
             return "redirect:/login";
         }
 
-        List<Service> services = serviceRepository.findAll();
+        List<SalonService> services = serviceRepository.findAll();
         List<Staff> staff = staffRepository.findAll();
 
         model.addAttribute("services", services);

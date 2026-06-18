@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 
 @Entity
 @Table(name = "services")
-public class Service {
+public class SalonService {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,13 +17,11 @@ public class Service {
     private String description;
     private Integer duration;
     private BigDecimal price;
-    private Boolean active = true;  // Default to true
+    private Boolean active = true;
 
-    // Default constructor (required for JPA)
-    public Service() {}
+    public SalonService() {}
 
-    // Constructor with fields
-    public Service(String serviceName, String description, Integer duration, BigDecimal price) {
+    public SalonService(String serviceName, String description, Integer duration, BigDecimal price) {
         this.serviceName = serviceName;
         this.description = description;
         this.duration = duration;
