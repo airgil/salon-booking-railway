@@ -1,7 +1,7 @@
 package com.salon.controller;
 
 import com.salon.model.Booking;
-import com.salon.model.Service;
+import com.salon.model.SalonService;  // ← Changed
 import com.salon.model.Staff;
 import com.salon.repository.ServiceRepository;
 import com.salon.repository.StaffRepository;
@@ -106,12 +106,13 @@ public class AdminController {
 
     @GetMapping("/services")
     public String services(Model model) {
+        List<SalonService> services = serviceRepository.findAll();  // ← CHANGED
         model.addAttribute("services", serviceRepository.findAll());
         return "admin/services";
     }
 
     @PostMapping("/service/add")
-    public String addService(@ModelAttribute Service service) {
+    public String addService(@ModelAttribute SalonService service) {  // ← Changed
         service.setActive(true);
         serviceRepository.save(service);
         return "redirect:/admin/services";
@@ -119,18 +120,19 @@ public class AdminController {
 
     @GetMapping("/service/delete/{id}")
     public String deleteService(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        Service service = serviceRepository.findById(id).orElse(null);
+        SalonService service = serviceRepository.findById(id).orElse(null);  // ← Changed
 
         if (service == null) {
             redirectAttributes.addFlashAttribute("error", "Service not found!");
             return "redirect:/admin/services";
         }
 
-        List<Booking> bookings = bookingService.getBookingsByService(service);
+        // Check if service has bookings
+        List<Booking> bookings = bookingService.getBookingsByService(service);  // ← Changed
 
         if (!bookings.isEmpty()) {
             redirectAttributes.addFlashAttribute("error",
-                    "Cannot delete service '" + service.getServiceName() +
+                    "Cannot delete service '" + service.getServiceName() +  // ← Changed
                             "' because it has " + bookings.size() + " existing bookings.");
             return "redirect:/admin/services";
         }

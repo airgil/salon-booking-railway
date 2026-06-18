@@ -1,6 +1,6 @@
 package com.salon.controller;
 
-import com.salon.model.Service;
+import com.salon.model.SalonService;
 import com.salon.model.Staff;
 import com.salon.repository.ServiceRepository;
 import com.salon.repository.StaffRepository;
@@ -22,7 +22,7 @@ public class HomeController {
 
     @GetMapping("/")
     public String home(Model model) {
-        List<Service> services = serviceRepository.findByActiveTrue();
+        List<SalonService> services = serviceRepository.findByActiveTrue();
         List<Staff> staff = staffRepository.findAll();
         model.addAttribute("services", services);
         model.addAttribute("staff", staff);

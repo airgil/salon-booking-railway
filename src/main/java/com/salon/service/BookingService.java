@@ -1,5 +1,5 @@
 package com.salon.service;
-
+import com.salon.model.SalonService;
 import com.salon.model.Booking;
 import com.salon.model.Staff;
 import com.salon.model.User;
@@ -44,10 +44,11 @@ public class BookingService {
         return bookingRepository.findByStaff(staff);
     }
 
-    // Get all bookings for a specific service
-    public List<Booking> getBookingsByService(Service service) {
+    // Add this method
+    public List<Booking> getBookingsByService(SalonService service) {
         return bookingRepository.findByService(service);
     }
+
 
 
 
@@ -150,6 +151,8 @@ public class BookingService {
 
         return count;
     }
+
+
 
 
     public List<Booking> getTodayBookings() {

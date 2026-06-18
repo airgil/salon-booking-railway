@@ -1,6 +1,7 @@
 package com.salon.repository;
 
 import com.salon.model.Booking;
+import com.salon.model.SalonService;  // ← ADD THIS IMPORT
 import com.salon.model.Staff;
 import com.salon.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -43,7 +44,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("SELECT DISTINCT b.status FROM Booking b WHERE b.user = :user ORDER BY b.status")
     List<String> findDistinctStatusesByUser(@Param("user") User user);
 
-
     // For reminders - get confirmed bookings for a specific date
     @Query("SELECT b FROM Booking b WHERE b.date = :date AND b.status = 'confirmed'")
     List<Booking> findConfirmedBookingsByDate(@Param("date") LocalDate date);
@@ -82,4 +82,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("date") LocalDate date
     );
 
+    // Find bookings by service - FIXED: Use SalonService
+    List<Booking> findByService(SalonService service);
 }
