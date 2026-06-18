@@ -43,9 +43,32 @@ public class AdminController {
     @GetMapping("/bookings")
     public String bookings(Model model) {
         List<Booking> bookings = bookingService.getAllBookings();
+
+        // Calculate statistics
+        int totalBookings = bookings.size();
+        int pendingCount = (int) bookings.stream()
+                .filter(b -> "pending".equals(b.getStatus()))
+                .count();
+        int confirmedCount = (int) bookings.stream()
+                .filter(b -> "confirmed".equals(b.getStatus()))
+                .count();
+        int completedCount = (int) bookings.stream()
+                .filter(b -> "completed".equals(b.getStatus()))
+                .count();
+        int cancelledCount = (int) bookings.stream()
+                .filter(b -> "cancelled".equals(b.getStatus()))
+                .count();
+
         model.addAttribute("bookings", bookings);
+        model.addAttribute("totalBookings", totalBookings);
+        model.addAttribute("pendingCount", pendingCount);
+        model.addAttribute("confirmedCount", confirmedCount);
+        model.addAttribute("completedCount", completedCount);
+        model.addAttribute("cancelledCount", cancelledCount);
+
         return "admin/bookings";
     }
+
 
     @PostMapping("/booking/update")
     public String updateBookingStatus(@RequestParam Long id, @RequestParam String status) {

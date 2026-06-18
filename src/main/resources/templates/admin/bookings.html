@@ -338,28 +338,28 @@
         <div class="col-md-3 col-6 mb-3">
             <div class="stat-card">
                 <span class="stat-icon">📊</span>
-                <div class="stat-number purple" th:text="${#lists.size(bookings)}">0</div>
+                <div class="stat-number purple" th:text="${totalBookings}">0</div>
                 <div class="stat-label">Total Bookings</div>
             </div>
         </div>
         <div class="col-md-3 col-6 mb-3">
             <div class="stat-card">
                 <span class="stat-icon">⏳</span>
-                <div class="stat-number orange">0</div>
+                <div class="stat-number orange" th:text="${pendingCount}">0</div>
                 <div class="stat-label">Pending</div>
             </div>
         </div>
         <div class="col-md-3 col-6 mb-3">
             <div class="stat-card">
                 <span class="stat-icon">✅</span>
-                <div class="stat-number green">0</div>
+                <div class="stat-number green" th:text="${confirmedCount}">0</div>
                 <div class="stat-label">Confirmed</div>
             </div>
         </div>
         <div class="col-md-3 col-6 mb-3">
             <div class="stat-card">
                 <span class="stat-icon">🎉</span>
-                <div class="stat-number blue">0</div>
+                <div class="stat-number blue" th:text="${completedCount}">0</div>
                 <div class="stat-label">Completed</div>
             </div>
         </div>
