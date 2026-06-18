@@ -48,20 +48,15 @@ public class AdminController {
                            @RequestParam(required = false) String dateFrom,
                            @RequestParam(required = false) String dateTo,
                            Model model) {
-        // Get all bookings
         List<Booking> allBookings = bookingService.getAllBookings();
-
-        // Start with all bookings
         List<Booking> filteredBookings = allBookings;
 
-        // Apply status filter
         if (status != null && !status.isEmpty() && !"all".equals(status)) {
             filteredBookings = filteredBookings.stream()
                     .filter(b -> status.equals(b.getStatus()))
                     .collect(Collectors.toList());
         }
 
-        // Apply date from filter
         if (dateFrom != null && !dateFrom.isEmpty()) {
             LocalDate fromDate = LocalDate.parse(dateFrom);
             filteredBookings = filteredBookings.stream()
@@ -69,7 +64,6 @@ public class AdminController {
                     .collect(Collectors.toList());
         }
 
-        // Apply date to filter
         if (dateTo != null && !dateTo.isEmpty()) {
             LocalDate toDate = LocalDate.parse(dateTo);
             filteredBookings = filteredBookings.stream()
@@ -77,7 +71,6 @@ public class AdminController {
                     .collect(Collectors.toList());
         }
 
-        // Calculate statistics from filtered bookings
         int totalBookings = allBookings.size();
         int pendingCount = (int) allBookings.stream()
                 .filter(b -> "pending".equals(b.getStatus()))
@@ -92,15 +85,12 @@ public class AdminController {
                 .filter(b -> "cancelled".equals(b.getStatus()))
                 .count();
 
-        // Add attributes to model
         model.addAttribute("bookings", filteredBookings);
         model.addAttribute("totalBookings", totalBookings);
         model.addAttribute("pendingCount", pendingCount);
         model.addAttribute("confirmedCount", confirmedCount);
         model.addAttribute("completedCount", completedCount);
         model.addAttribute("cancelledCount", cancelledCount);
-
-        // These are the critical values for the filter form
         model.addAttribute("selectedStatus", status != null ? status : "all");
         model.addAttribute("selectedDateFrom", dateFrom);
         model.addAttribute("selectedDateTo", dateTo);
@@ -127,35 +117,22 @@ public class AdminController {
         return "redirect:/admin/services";
     }
 
-/*    @GetMapping("/service/delete/{id}")
-    public String deleteService(@PathVariable Long id) {
-        serviceRepository.deleteById(id);
-        return "redirect:/admin/services";
-    }*/
-
     @GetMapping("/service/delete/{id}")
     public String deleteService(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        System.out.println("========================================");
-        System.out.println("🗑️ Deleting service with ID: " + id);
-        System.out.println("========================================");
-
         try {
             serviceRepository.deleteById(id);
-            System.out.println("✅ Service deleted successfully");
             redirectAttributes.addFlashAttribute("success", "Service deleted successfully!");
         } catch (Exception e) {
-            System.err.println("❌ Failed to delete service: " + e.getMessage());
             redirectAttributes.addFlashAttribute("error", "Failed to delete service: " + e.getMessage());
         }
-
         return "redirect:/admin/services";
     }
 
     @GetMapping("/staff")
     public String staff(Model model) {
         List<Staff> staffList = staffRepository.findAll();
-        int availableCount = (int) staffList.stream()
-                .filter(Staff::getIsAvailable)
+        long availableCount = staffList.stream()
+                .filter(s -> s.getIsAvailable() != null && s.getIsAvailable())
                 .count();
 
         model.addAttribute("staff", staffList);
@@ -164,26 +141,37 @@ public class AdminController {
     }
 
     @PostMapping("/staff/add")
-    public String addStaff(@ModelAttribute Staff staff) {
-        staff.setIsAvailable(true);
-        staffRepository.save(staff);
-        return "redirect:/admin/staff";
-    }
-
-    // ADD THIS METHOD - Toggle Staff Availability
-    @PostMapping("/staff/toggle/{id}")
-    public String toggleStaffAvailability(@PathVariable Long id) {
-        Staff staff = staffRepository.findById(id).orElse(null);
-        if (staff != null) {
-            staff.setIsAvailable(!staff.getIsAvailable());
+    public String addStaff(@ModelAttribute Staff staff, RedirectAttributes redirectAttributes) {
+        try {
+            staff.setIsAvailable(true);
             staffRepository.save(staff);
+            redirectAttributes.addFlashAttribute("success", "Staff member added successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to add staff: " + e.getMessage());
         }
         return "redirect:/admin/staff";
     }
 
+    @PostMapping("/staff/toggle/{id}")
+    public String toggleStaffAvailability(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            Staff staff = staffRepository.findById(id).orElse(null);
+            if (staff != null) {
+                boolean currentStatus = staff.getIsAvailable();
+                staff.setIsAvailable(!currentStatus);
+                staffRepository.save(staff);
+                redirectAttributes.addFlashAttribute("success",
+                        "Staff availability updated! " + staff.getStaffName() +
+                                " is now " + (staff.getIsAvailable() ? "Available" : "Unavailable"));
+            } else {
+                redirectAttributes.addFlashAttribute("error", "Staff not found!");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to toggle availability: " + e.getMessage());
+        }
+        return "redirect:/admin/staff";
+    }
 
-    // ADD THIS METHOD - Delete Staff
-    // Updated delete staff method - redirects to reassign if bookings exist
     @GetMapping("/staff/delete/{id}")
     public String deleteStaff(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         Staff staff = staffRepository.findById(id).orElse(null);
@@ -197,19 +185,75 @@ public class AdminController {
         List<Booking> bookings = bookingService.getBookingsByStaff(staff);
 
         if (!bookings.isEmpty()) {
-            // Redirect to reassign page
             redirectAttributes.addFlashAttribute("info",
                     "Staff member '" + staff.getStaffName() +
                             "' has " + bookings.size() + " existing bookings. Please reassign them first.");
             return "redirect:/admin/staff/reassign/" + id;
         }
 
-        // No bookings, safe to delete
         try {
             staffRepository.deleteById(id);
             redirectAttributes.addFlashAttribute("success", "Staff member deleted successfully!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Failed to delete staff: " + e.getMessage());
+        }
+
+        return "redirect:/admin/staff";
+    }
+
+    @GetMapping("/staff/reassign/{id}")
+    public String showReassignForm(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
+        Staff staffToDelete = staffRepository.findById(id).orElse(null);
+
+        if (staffToDelete == null) {
+            redirectAttributes.addFlashAttribute("error", "Staff member not found!");
+            return "redirect:/admin/staff";
+        }
+
+        // Get all other staff members (excluding the one to delete)
+        List<Staff> availableStaff = staffRepository.findAll().stream()
+                .filter(s -> !s.getId().equals(id))
+                .filter(s -> s.getIsAvailable() != null && s.getIsAvailable())
+                .collect(Collectors.toList());
+
+        if (availableStaff.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error",
+                    "No other available staff members found. Please add another staff member first.");
+            return "redirect:/admin/staff";
+        }
+
+        int bookingsCount = bookingService.getBookingsByStaff(staffToDelete).size();
+
+        model.addAttribute("staffToDelete", staffToDelete);
+        model.addAttribute("availableStaff", availableStaff);
+        model.addAttribute("bookingsCount", bookingsCount);
+
+        return "admin/staff-reassign";
+    }
+
+    @PostMapping("/staff/reassign")
+    public String reassignStaff(@RequestParam Long oldStaffId,
+                                @RequestParam Long newStaffId,
+                                RedirectAttributes redirectAttributes) {
+        try {
+            Staff oldStaff = staffRepository.findById(oldStaffId).orElse(null);
+            Staff newStaff = staffRepository.findById(newStaffId).orElse(null);
+
+            if (oldStaff == null || newStaff == null) {
+                redirectAttributes.addFlashAttribute("error", "Staff member not found!");
+                return "redirect:/admin/staff";
+            }
+
+            // Reassign bookings
+            int count = bookingService.reassignBookings(oldStaffId, newStaffId);
+
+            redirectAttributes.addFlashAttribute("success",
+                    "Successfully reassigned " + count + " bookings from " +
+                            oldStaff.getStaffName() + " to " + newStaff.getStaffName() +
+                            " and deleted " + oldStaff.getStaffName());
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to reassign: " + e.getMessage());
         }
 
         return "redirect:/admin/staff";
@@ -237,11 +281,4 @@ public class AdminController {
 
         return "admin/reports";
     }
-
-
-
-
-
-
-
 }
