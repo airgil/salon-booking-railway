@@ -185,14 +185,26 @@ public class AdminController {
 
         try {
             Staff staff = staffRepository.findById(id).orElse(null);
-            if (staff != null) {
-                staffRepository.deleteById(id);
-                System.out.println("✅ Staff deleted successfully: " + staff.getStaffName());
-                redirectAttributes.addFlashAttribute("success", "Staff member deleted successfully!");
-            } else {
-                System.out.println("❌ Staff not found with ID: " + id);
+            if (staff == null) {
                 redirectAttributes.addFlashAttribute("error", "Staff member not found!");
+                return "redirect:/admin/staff";
             }
+
+            // Check if staff has bookings
+            List<Booking> bookings = bookingService.getBookingsByStaff(staff);
+            if (!bookings.isEmpty()) {
+                System.out.println("⚠️ Staff has " + bookings.size() + " bookings. Cannot delete.");
+                redirectAttributes.addFlashAttribute("error",
+                        "Cannot delete staff member '" + staff.getStaffName() +
+                                "' because they have " + bookings.size() + " existing bookings. " +
+                                "Please reassign or cancel these bookings first.");
+                return "redirect:/admin/staff";
+            }
+
+            staffRepository.deleteById(id);
+            System.out.println("✅ Staff deleted successfully: " + staff.getStaffName());
+            redirectAttributes.addFlashAttribute("success", "Staff member deleted successfully!");
+
         } catch (Exception e) {
             System.err.println("❌ Failed to delete staff: " + e.getMessage());
             redirectAttributes.addFlashAttribute("error", "Failed to delete staff: " + e.getMessage());

@@ -493,6 +493,12 @@
                                     <span class="badge-unavailable" th:unless="${staff.isAvailable}" th:text="${staff.isAvailable ? '' : 'Unavailable'}">Unavailable</span>
                                 </td>
                                 <td>
+        <span class="badge bg-secondary">
+            <i class="bi bi-calendar-check"></i>
+            <span th:text="${staff.bookings != null ? staff.bookings.size() : 0}">0</span> bookings
+        </span>
+                                </td>
+                                <td>
                                     <form th:action="@{/admin/staff/toggle/{id}(id=${staff.id})}" method="post" style="display:inline;">
                                         <button type="submit" class="btn-toggle">
                                             <i class="bi bi-arrow-repeat"></i>

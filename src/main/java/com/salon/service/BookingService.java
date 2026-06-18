@@ -118,6 +118,10 @@ public class BookingService {
         return false;
     }
 
+    public List<Booking> getBookingsByStaff(Staff staff) {
+        return bookingRepository.findByStaff(staff);
+    }
+
 
 
     public List<Booking> getTodayBookings() {
