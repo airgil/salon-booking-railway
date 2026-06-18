@@ -2,112 +2,646 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Customer Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Dashboard - Salon Booking</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6C63FF;
+            --primary-dark: #5a52d5;
+            --secondary: #FF6584;
+            --dark: #1a1a2e;
+            --gradient: linear-gradient(135deg, #6C63FF 0%, #FF6584 100%);
+        }
+
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: #f0f2f5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== NAVBAR ===== */
+        .navbar-custom {
+            background: var(--dark) !important;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.3);
+            padding: 12px 0;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: #fff !important;
+        }
+
+        .navbar-brand span {
+            color: var(--primary);
+        }
+
+        .user-welcome {
+            font-weight: 500;
+            color: rgba(255,255,255,0.9);
+            background: rgba(255,255,255,0.08);
+            padding: 8px 18px;
+            border-radius: 50px;
+            margin-right: 10px;
+            font-size: 14px;
+        }
+
+        .user-welcome i {
+            color: var(--secondary);
+            margin-right: 8px;
+        }
+
+        .nav-link {
+            color: rgba(255,255,255,0.7) !important;
+            font-weight: 500;
+            transition: all 0.3s;
+            padding: 8px 18px !important;
+            border-radius: 8px;
+        }
+
+        .nav-link:hover {
+            color: #fff !important;
+            background: rgba(108, 99, 255, 0.2);
+        }
+
+        .nav-link.btn-logout {
+            color: #ff6b6b !important;
+        }
+
+        .nav-link.btn-logout:hover {
+            background: rgba(255, 107, 107, 0.2);
+        }
+
+        /* ===== WELCOME BANNER ===== */
+        .welcome-banner {
+            background: var(--gradient);
+            padding: 40px 35px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(108, 99, 255, 0.3);
+        }
+
+        .welcome-banner::before {
+            content: '';
+            position: absolute;
+            right: -80px;
+            top: -80px;
+            width: 300px;
+            height: 300px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+        }
+
+        .welcome-banner::after {
+            content: '';
+            position: absolute;
+            left: -50px;
+            bottom: -50px;
+            width: 200px;
+            height: 200px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 50%;
+        }
+
+        .welcome-banner h1 {
+            font-weight: 700;
+            font-size: 2rem;
+            color: #fff;
+            position: relative;
+            z-index: 1;
+        }
+
+        .welcome-banner h1 span {
+            background: rgba(255,255,255,0.2);
+            padding: 2px 15px;
+            border-radius: 50px;
+        }
+
+        .welcome-banner p {
+            color: rgba(255,255,255,0.85);
+            font-size: 1.05rem;
+            position: relative;
+            z-index: 1;
+            margin-bottom: 0;
+        }
+
+        .welcome-banner .stats-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 14px;
+            margin-top: 15px;
+            margin-right: 10px;
+        }
+
+        .welcome-banner .stats-badge i {
+            margin-right: 6px;
+        }
+
+        /* ===== STATS CARDS ===== */
+        .stat-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 22px 20px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+            border: 1px solid rgba(0,0,0,0.03);
+            height: 100%;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        .stat-icon.purple { background: rgba(108, 99, 255, 0.12); color: var(--primary); }
+        .stat-icon.green { background: rgba(46, 213, 115, 0.12); color: #2ed573; }
+        .stat-icon.orange { background: rgba(255, 165, 0, 0.12); color: #ffa502; }
+        .stat-icon.pink { background: rgba(255, 101, 132, 0.12); color: var(--secondary); }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--dark);
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            color: #6c757d;
+            font-size: 13px;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        /* ===== QUICK ACTIONS ===== */
+        .quick-action-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 25px 20px;
+            text-align: center;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            cursor: pointer;
+            height: 100%;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+        }
+
+        .quick-action-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 8px 30px rgba(108, 99, 255, 0.15);
+        }
+
+        .quick-action-icon {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 15px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(108, 99, 255, 0.08);
+            font-size: 28px;
+            color: var(--primary);
+            transition: all 0.3s;
+        }
+
+        .quick-action-card:hover .quick-action-icon {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .quick-action-title {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .quick-action-desc {
+            color: #6c757d;
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+
+        /* ===== BOOKING CARDS ===== */
+        .booking-card {
+            background: #fff;
+            border-radius: 14px;
+            padding: 18px 22px;
+            margin-bottom: 12px;
+            border-left: 4px solid #6c757d;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+            transition: all 0.3s;
+        }
+
+        .booking-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .booking-card.confirmed { border-left-color: #2ed573; }
+        .booking-card.pending { border-left-color: #ffa502; }
+        .booking-card.completed { border-left-color: #1e90ff; }
+        .booking-card.cancelled { border-left-color: #ff4757; }
+
+        .booking-service {
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 15px;
+        }
+
+        .booking-detail {
+            color: #6c757d;
+            font-size: 13px;
+        }
+
+        .booking-detail i {
+            margin-right: 4px;
+        }
+
+        .status-badge {
+            padding: 4px 14px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .status-badge.confirmed { background: #d4edda; color: #155724; }
+        .status-badge.pending { background: #fff3cd; color: #856404; }
+        .status-badge.completed { background: #d1ecf1; color: #0c5460; }
+        .status-badge.cancelled { background: #f8d7da; color: #721c24; }
+
+        .section-title {
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background: var(--gradient);
+            border-radius: 10px;
+        }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            color: #dee2e6;
+            margin-bottom: 15px;
+        }
+
+        .empty-state h5 {
+            color: var(--dark);
+            font-weight: 600;
+        }
+
+        .empty-state p {
+            color: #6c757d;
+            max-width: 400px;
+            margin: 10px auto;
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            background: var(--dark);
+            color: rgba(255,255,255,0.6);
+            padding: 20px 0;
+            margin-top: auto;
+        }
+
+        .footer a {
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer a:hover {
+            color: #fff;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .welcome-banner {
+                padding: 25px 20px;
+            }
+
+            .welcome-banner h1 {
+                font-size: 1.4rem;
+            }
+
+            .stat-number {
+                font-size: 20px;
+            }
+
+            .quick-action-card {
+                padding: 18px 15px;
+            }
+
+            .booking-card {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .stat-card {
+                padding: 15px;
+            }
+
+            .stat-number {
+                font-size: 18px;
+            }
+        }
+    </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+
+<!-- ===== NAVBAR ===== -->
+<nav class="navbar navbar-expand-lg navbar-custom">
     <div class="container">
-        <a class="navbar-brand" href="#">✂️ Salon Booking</a>
-        <div class="navbar-nav ms-auto">
-            <span class="nav-link text-white">Welcome, <span th:text="${user.fullName}"></span></span>
-            <a class="nav-link" href="/logout">Logout</a>
+        <a class="navbar-brand" href="/customer/dashboard">
+            ✂️ Salon<span>Booking</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item">
+                    <span class="user-welcome">
+                        <i class="bi bi-person-circle"></i>
+                        <span th:text="${user.fullName}"></span>
+                    </span>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/customer/dashboard">
+                        <i class="bi bi-grid"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/my-bookings">
+                        <i class="bi bi-calendar-check"></i> Bookings
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link btn-logout" href="/logout">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </a>
+                </li>
+            </ul>
         </div>
     </div>
 </nav>
 
+<!-- ===== MAIN CONTENT ===== -->
 <div class="container mt-4">
-    <div class="row">
-        <!-- Quick Actions -->
-        <div class="col-md-4 mb-4">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h5 class="card-title">📅 Book Appointment</h5>
-                    <p class="card-text">Schedule a new service appointment</p>
-                    <a href="/customer/book" class="btn btn-primary">Book Now</a>
+
+    <!-- Welcome Banner -->
+    <div class="welcome-banner">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1>
+                    👋 Welcome back, <span th:text="${user.fullName}"></span>!
+                </h1>
+                <p>Manage your appointments, explore services, and stay beautiful!</p>
+                <div>
+                    <span class="stats-badge">
+                        <i class="bi bi-calendar-check"></i>
+                        <span th:text="${upcomingCount != null ? upcomingCount : 0}"></span> Upcoming
+                    </span>
+                    <span class="stats-badge">
+                        <i class="bi bi-clock-history"></i>
+                        <span th:text="${totalBookings != null ? totalBookings : 0}"></span> Total Bookings
+                    </span>
                 </div>
             </div>
-        </div>
-
-        <!-- My Bookings Card -->
-        <div class="col-md-4 mb-4">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h5 class="card-title">📋 My Bookings</h5>
-                    <p class="card-text">View and manage your appointments</p>
-                    <a href="/my-bookings" class="btn btn-info text-white">View Bookings</a>
-                </div>
+            <div class="col-lg-4 text-center d-none d-lg-block">
+                <i class="bi bi-calendar-heart" style="font-size: 4rem; opacity: 0.3; color: #fff;"></i>
             </div>
         </div>
+    </div>
 
-        <!-- Profile Card -->
-        <div class="col-md-4 mb-4">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h5 class="card-title">👤 My Profile</h5>
-                    <p class="card-text">View and update your profile</p>
-                    <a href="/profile" class="btn btn-secondary">View Profile</a>
-                </div>
+    <!-- Statistics -->
+    <div class="row g-4 mb-4">
+        <div class="col-sm-6 col-lg-3">
+            <div class="stat-card">
+                <div class="stat-icon purple"><i class="bi bi-calendar-check"></i></div>
+                <h3 class="stat-number" th:text="${totalBookings != null ? totalBookings : 0}">0</h3>
+                <p class="stat-label">Total Bookings</p>
             </div>
         </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stat-card">
+                <div class="stat-icon green"><i class="bi bi-check-circle"></i></div>
+                <h3 class="stat-number" th:text="${confirmedCount != null ? confirmedCount : 0}">0</h3>
+                <p class="stat-label">Confirmed</p>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stat-card">
+                <div class="stat-icon orange"><i class="bi bi-clock"></i></div>
+                <h3 class="stat-number" th:text="${pendingCount != null ? pendingCount : 0}">0</h3>
+                <p class="stat-label">Pending</p>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="stat-card">
+                <div class="stat-icon pink"><i class="bi bi-calendar-event"></i></div>
+                <h3 class="stat-number" th:text="${upcomingCount != null ? upcomingCount : 0}">0</h3>
+                <p class="stat-label">Upcoming</p>
+            </div>
+        </div>
+    </div>
 
-        <!-- Recent Bookings -->
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5>My Recent Bookings</h5>
-                </div>
-                <div class="card-body">
-                    <div th:if="${bookings == null or bookings.isEmpty()}" class="alert alert-info">
-                        No bookings yet. <a href="/customer/book">Book now!</a>
-                    </div>
-                    <div th:unless="${bookings == null or bookings.isEmpty()}">
-                        <div class="table-responsive">
-                            <table class="table">
-                                <thead>
-                                <tr>
-                                    <th>Service</th>
-                                    <th>Staff</th>
-                                    <th>Date</th>
-                                    <th>Time</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr th:each="booking : ${bookings}">
-                                    <td th:text="${booking.service != null ? booking.service.serviceName : 'N/A'}"></td>
-                                    <td th:text="${booking.staff != null ? booking.staff.staffName : 'TBD'}"></td>
-                                    <td th:text="${booking.date}"></td>
-                                    <td th:text="${booking.time}"></td>
-                                    <td>
-                                            <span class="badge"
-                                                  th:class="${booking.status == 'confirmed' ? 'bg-success' :
-                                                            booking.status == 'pending' ? 'bg-warning text-dark' :
-                                                            booking.status == 'cancelled' ? 'bg-danger' : 'bg-secondary'}"
-                                                  th:text="${booking.status}"></span>
-                                    </td>
-                                    <td>
-                                        <a th:if="${booking.status == 'pending' or booking.status == 'confirmed'}"
-                                           th:href="@{/customer/cancel/{id}(id=${booking.id})}"
-                                           class="btn btn-sm btn-danger"
-                                           onclick="return confirm('Cancel this booking?')">
-                                            <i class="bi bi-x-circle"></i> Cancel
-                                        </a>
-                                        <a th:href="@{/my-bookings}" class="btn btn-sm btn-outline-secondary">
-                                            <i class="bi bi-eye"></i> View All
-                                        </a>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
+    <!-- Quick Actions -->
+    <h5 class="section-title">⚡ Quick Actions</h5>
+    <div class="row g-4 mb-5">
+        <div class="col-md-3 col-sm-6">
+            <div class="quick-action-card" onclick="window.location.href='/book'">
+                <div class="quick-action-icon"><i class="bi bi-calendar-plus"></i></div>
+                <h6 class="quick-action-title">Book Appointment</h6>
+                <p class="quick-action-desc">Schedule a new service</p>
+                <a href="/book" class="btn btn-sm btn-primary">Book Now</a>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="quick-action-card" onclick="window.location.href='/my-bookings'">
+                <div class="quick-action-icon"><i class="bi bi-journal-bookmark-fill"></i></div>
+                <h6 class="quick-action-title">My Bookings</h6>
+                <p class="quick-action-desc">View all appointments</p>
+                <a href="/my-bookings" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="quick-action-card" onclick="window.location.href='/services'">
+                <div class="quick-action-icon"><i class="bi bi-grid-3x3-gap-fill"></i></div>
+                <h6 class="quick-action-title">Services</h6>
+                <p class="quick-action-desc">Browse all services</p>
+                <a href="/services" class="btn btn-sm btn-outline-info">View Services</a>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="quick-action-card" onclick="window.location.href='/book'">
+                <div class="quick-action-icon"><i class="bi bi-arrow-repeat"></i></div>
+                <h6 class="quick-action-title">Reschedule</h6>
+                <p class="quick-action-desc">Change an appointment</p>
+                <a href="/my-bookings" class="btn btn-sm btn-outline-secondary">Manage</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Bookings -->
+    <h5 class="section-title">📋 Recent Bookings</h5>
+    <div class="card">
+        <div class="card-body p-0">
+
+            <!-- Empty State -->
+            <div th:if="${bookings == null or bookings.isEmpty()}" class="empty-state">
+                <i class="bi bi-calendar-plus"></i>
+                <h5>No Bookings Yet</h5>
+                <p>Ready to look your best? Book your first appointment now!</p>
+                <a href="/book" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-2"></i> Book Now
+                </a>
+            </div>
+
+            <!-- Bookings List -->
+            <div th:unless="${bookings == null or bookings.isEmpty()}">
+                <div class="p-3">
+                    <div th:each="booking : ${bookings}" class="booking-card" th:classappend="${booking.status}">
+                        <div class="row align-items-center">
+                            <div class="col-md-4">
+                                <div class="booking-service" th:text="${booking.service != null ? booking.service.serviceName : 'N/A'}">
+                                    Service
+                                </div>
+                                <div class="booking-detail">
+                                    <i class="bi bi-person"></i>
+                                    <span th:text="${booking.staff != null ? booking.staff.staffName : 'TBD'}">Staff</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="booking-detail">
+                                    <i class="bi bi-calendar3"></i>
+                                    <span th:text="${#temporals.format(booking.date, 'MMM dd, yyyy')}"></span>
+                                </div>
+                                <div class="booking-detail">
+                                    <i class="bi bi-clock"></i>
+                                    <span th:text="${#temporals.format(booking.time, 'h:mm a')}"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <span class="status-badge" th:classappend="${booking.status}" th:text="${booking.status}">
+                                    Status
+                                </span>
+                            </div>
+                            <div class="col-md-3 text-md-end mt-3 mt-md-0">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a th:if="${booking.status == 'pending' or booking.status == 'confirmed'}"
+                                       th:href="@{/cancel-booking/{id}(id=${booking.id})}"
+                                       class="btn btn-outline-danger"
+                                       onclick="return confirm('Cancel this booking? This cannot be undone.')">
+                                        <i class="bi bi-x-circle"></i>
+                                    </a>
+                                    <a th:if="${booking.status == 'pending' or booking.status == 'confirmed'}"
+                                       th:href="@{/reschedule-booking/{id}(id=${booking.id})}"
+                                       class="btn btn-outline-primary">
+                                        <i class="bi bi-arrow-repeat"></i>
+                                    </a>
+                                    <a th:href="@{/qr/view/{id}(id=${booking.id})}" class="btn btn-outline-info">
+                                        <i class="bi bi-qr-code"></i>
+                                    </a>
+                                    <a th:href="@{/my-bookings}" class="btn btn-outline-secondary">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                </div>
+
+                <!-- View All Button -->
+                <div class="text-center p-3 border-top">
+                    <a href="/my-bookings" class="btn btn-outline-primary">
+                        <i class="bi bi-arrow-right-circle me-2"></i> View All Bookings
+                    </a>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Quick Tips -->
+    <div class="row mt-4 mb-5">
+        <div class="col-12">
+            <div class="alert alert-info alert-dismissible fade show border-0" style="background: #e8f4fd; border-radius: 14px;">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-lightbulb-fill me-3" style="font-size: 24px; color: #0dcaf0;"></i>
+                    <div>
+                        <strong>Quick Tips:</strong>
+                        <ul class="mb-0 mt-1 ps-3">
+                            <li>Book appointments at least <strong>2 hours</strong> in advance</li>
+                            <li>Cancel or reschedule at least <strong>2 hours</strong> before your appointment</li>
+                            <li>You can have a maximum of <strong>3 bookings</strong> per day</li>
+                        </ul>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6 text-center text-md-start">
+                <p class="mb-0">© 2026 Salon Booking System. All rights reserved.</p>
+            </div>
+            <div class="col-md-6 text-center text-md-end">
+                <small>
+                    <i class="bi bi-clock me-1"></i> Working Hours: 9:00 AM - 8:00 PM
+                </small>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
