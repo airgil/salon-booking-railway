@@ -493,7 +493,7 @@
     <div class="row g-4 mb-5">
         <!-- Book Appointment -->
         <div class="col-md-3 col-sm-6">
-            <div class="quick-action-card" onclick="location.href='/book'" style="cursor:pointer;">
+            <div class="quick-action-card" onclick="location.href='/customer/book'" style="cursor:pointer;">
                 <div class="quick-action-icon"><i class="bi bi-calendar-plus"></i></div>
                 <h6 class="quick-action-title">Book Appointment</h6>
                 <p class="quick-action-desc">Schedule a new service</p>
@@ -512,13 +512,11 @@
         </div>
 
         <!-- Services -->
-        <div class="col-md-3 col-sm-6">
-            <div class="quick-action-card" onclick="location.href='/services'" style="cursor:pointer;">
-                <div class="quick-action-icon"><i class="bi bi-grid-3x3-gap-fill"></i></div>
-                <h6 class="quick-action-title">Services</h6>
-                <p class="quick-action-desc">Browse all services</p>
-                <span class="btn btn-sm btn-outline-info">View Services</span>
-            </div>
+        <div class="quick-action-card" onclick="location.href='/'" style="cursor:pointer;">
+            <div class="quick-action-icon"><i class="bi bi-grid-3x3-gap-fill"></i></div>
+            <h6 class="quick-action-title">Services</h6>
+            <p class="quick-action-desc">Browse all services</p>
+            <span class="btn btn-sm btn-outline-info">View Services</span>
         </div>
 
         <!-- Reschedule -->
@@ -542,7 +540,7 @@
                 <i class="bi bi-calendar-plus"></i>
                 <h5>No Bookings Yet</h5>
                 <p>Ready to look your best? Book your first appointment now!</p>
-                <a href="/book" class="btn btn-primary">
+                <a href="/customer/book" class="btn btn-primary">
                     <i class="bi bi-plus-circle me-2"></i> Book Now
                 </a>
             </div>
