@@ -153,7 +153,13 @@ public class AdminController {
 
     @GetMapping("/staff")
     public String staff(Model model) {
-        model.addAttribute("staff", staffRepository.findAll());
+        List<Staff> staffList = staffRepository.findAll();
+        int availableCount = (int) staffList.stream()
+                .filter(Staff::getIsAvailable)
+                .count();
+
+        model.addAttribute("staff", staffList);
+        model.addAttribute("availableCount", availableCount);
         return "admin/staff";
     }
 

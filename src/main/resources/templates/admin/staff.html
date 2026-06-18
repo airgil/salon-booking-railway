@@ -310,6 +310,27 @@
             color: #fff;
         }
 
+        .btn-reassign {
+            background: #17a2b8;
+            border: none;
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-reassign:hover {
+            background: #138496;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(23, 162, 184, 0.4);
+            color: #fff;
+        }
+
         .empty-state {
             text-align: center;
             padding: 60px 20px;
@@ -402,6 +423,23 @@
 <!-- ===== MAIN CONTENT ===== -->
 <div class="container mt-4">
 
+    <!-- Success/Error Messages -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-circle-fill me-2"></i>
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${info}" class="alert alert-info alert-dismissible fade show" role="alert">
+        <i class="bi bi-info-circle-fill me-2"></i>
+        <span th:text="${info}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
     <!-- Page Header -->
     <div class="page-header">
         <h2><i class="bi bi-people"></i> Manage Staff</h2>
@@ -420,7 +458,7 @@
         <div class="col-md-6 col-6 mb-3">
             <div class="stat-card">
                 <span class="stat-icon">✅</span>
-                <div class="stat-number green">0</div>
+                <div class="stat-number green" th:text="${availableCount != null ? availableCount : 0}">0</div>
                 <div class="stat-label">Available</div>
             </div>
         </div>
@@ -493,12 +531,6 @@
                                     <span class="badge-unavailable" th:unless="${staff.isAvailable}" th:text="${staff.isAvailable ? '' : 'Unavailable'}">Unavailable</span>
                                 </td>
                                 <td>
-        <span class="badge bg-secondary">
-            <i class="bi bi-calendar-check"></i>
-            <span th:text="${staff.bookings != null ? staff.bookings.size() : 0}">0</span> bookings
-        </span>
-                                </td>
-                                <td>
                                     <form th:action="@{/admin/staff/toggle/{id}(id=${staff.id})}" method="post" style="display:inline;">
                                         <button type="submit" class="btn-toggle">
                                             <i class="bi bi-arrow-repeat"></i>
@@ -511,7 +543,7 @@
                                         <i class="bi bi-trash"></i>
                                     </a>
                                     <a th:href="@{/admin/staff/reassign/{id}(id=${staff.id})}"
-                                       class="btn btn-warning btn-sm">
+                                       class="btn-reassign">
                                         <i class="bi bi-arrow-repeat"></i> Reassign
                                     </a>
                                 </td>
@@ -534,19 +566,6 @@
         </div>
     </div>
 
-</div>
-
-
-<!-- Success/Error Messages -->
-<div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
-    <i class="bi bi-check-circle-fill me-2"></i>
-    <span th:text="${success}"></span>
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-</div>
-<div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-    <i class="bi bi-exclamation-circle-fill me-2"></i>
-    <span th:text="${error}"></span>
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 </div>
 
 <!-- ===== FOOTER ===== -->
