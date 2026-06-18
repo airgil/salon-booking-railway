@@ -2,76 +2,465 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Bookings</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        .booking-card {
-            transition: transform 0.2s;
-            border-left: 4px solid #6c757d;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .booking-card:hover {
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+        }
+
+        /* ===== NAVBAR ===== */
+        .navbar {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 15px 0;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.1);
+        }
+
+        .navbar-brand {
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff !important;
+        }
+
+        .navbar-brand span {
+            color: #6C63FF;
+        }
+
+        .nav-link {
+            color: rgba(255,255,255,0.7) !important;
+            font-weight: 500;
+            transition: all 0.3s;
+            padding: 8px 20px !important;
+            border-radius: 8px;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: #fff !important;
+            background: rgba(108, 99, 255, 0.2);
+        }
+
+        .nav-link.btn-logout {
+            color: #ff6b6b !important;
+        }
+
+        .nav-link.btn-logout:hover {
+            background: rgba(255, 107, 107, 0.2);
+        }
+
+        /* ===== PAGE HEADER ===== */
+        .page-header {
+            margin-bottom: 30px;
+        }
+
+        .page-header h2 {
+            font-weight: 700;
+            color: #1a1a2e;
+            font-size: 32px;
+        }
+
+        .page-header h2 i {
+            color: #6C63FF;
+        }
+
+        .btn-new-booking {
+            background: linear-gradient(135deg, #6C63FF, #5a52d5);
+            color: #fff;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-new-booking:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 25px rgba(108, 99, 255, 0.4);
+            color: #fff;
         }
-        .status-pending { border-left-color: #ffc107; }
-        .status-confirmed { border-left-color: #17a2b8; }
-        .status-completed { border-left-color: #28a745; }
-        .status-cancelled { border-left-color: #dc3545; }
-        .stat-card { background: white; border-radius: 10px; padding: 15px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .stat-number { font-size: 24px; font-weight: bold; }
-        .stat-label { color: #6c757d; font-size: 14px; }
+
+        /* ===== STATS CARDS ===== */
+        .stats-row {
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+            border: 1px solid rgba(0,0,0,0.03);
+            height: 100%;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #6c757d;
+            font-size: 13px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        /* ===== FILTERS ===== */
+        .filter-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.03);
+            margin-bottom: 30px;
+        }
+
+        .filter-card label {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .filter-card .form-select {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            padding: 10px 15px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .filter-card .form-select:focus {
+            border-color: #6C63FF;
+            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.15);
+        }
+
+        .btn-apply {
+            background: linear-gradient(135deg, #6C63FF, #5a52d5);
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .btn-apply:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(108, 99, 255, 0.4);
+        }
+
+        .btn-clear {
+            color: #6c757d;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn-clear:hover {
+            color: #dc3545;
+        }
+
+        /* ===== BOOKING CARDS ===== */
+        .booking-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 20px 25px;
+            margin-bottom: 15px;
+            border-left: 5px solid #6c757d;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+            transition: all 0.3s;
+        }
+
+        .booking-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        }
+
+        .booking-card.status-pending { border-left-color: #ffc107; }
+        .booking-card.status-confirmed { border-left-color: #17a2b8; }
+        .booking-card.status-completed { border-left-color: #28a745; }
+        .booking-card.status-cancelled { border-left-color: #dc3545; }
+
+        .booking-service {
+            font-weight: 600;
+            color: #1a1a2e;
+            font-size: 16px;
+        }
+
+        .booking-meta {
+            color: #6c757d;
+            font-size: 13px;
+        }
+
+        .booking-meta i {
+            margin-right: 4px;
+        }
+
+        .booking-staff {
+            font-size: 14px;
+            color: #333;
+        }
+
+        .booking-id {
+            color: #6c757d;
+            font-size: 12px;
+        }
+
+        .badge-status {
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-status.pending { background: #fff3cd; color: #856404; }
+        .badge-status.confirmed { background: #d1ecf1; color: #0c5460; }
+        .badge-status.completed { background: #d4edda; color: #155724; }
+        .badge-status.cancelled { background: #f8d7da; color: #721c24; }
+
+        /* ===== BUTTONS ===== */
+        .btn-group-custom {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .btn-group-custom .btn {
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-group-custom .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-qr {
+            background: #6C63FF;
+            color: #fff;
+            border: none;
+        }
+
+        .btn-qr:hover {
+            background: #5a52d5;
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(108, 99, 255, 0.4);
+        }
+
+        .btn-cancel {
+            background: #dc3545;
+            color: #fff;
+            border: none;
+        }
+
+        .btn-cancel:hover {
+            background: #c82333;
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+        }
+
+        .btn-details {
+            background: #f8f9fa;
+            color: #333;
+            border: 1px solid #e9ecef;
+        }
+
+        .btn-details:hover {
+            background: #e9ecef;
+            color: #1a1a2e;
+        }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            color: #dee2e6;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h4 {
+            color: #1a1a2e;
+            font-weight: 600;
+        }
+
+        .empty-state p {
+            color: #6c757d;
+            max-width: 400px;
+            margin: 10px auto 0;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .page-header h2 {
+                font-size: 24px;
+            }
+
+            .stat-card {
+                padding: 15px;
+            }
+
+            .stat-number {
+                font-size: 20px;
+            }
+
+            .booking-card {
+                padding: 15px;
+            }
+
+            .btn-group-custom {
+                justify-content: flex-start;
+                margin-top: 10px;
+            }
+
+            .btn-group-custom .btn {
+                font-size: 12px;
+                padding: 5px 10px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .stats-row .col-6 {
+                padding: 0 6px;
+            }
+
+            .stat-number {
+                font-size: 18px;
+            }
+
+            .stat-label {
+                font-size: 11px;
+            }
+        }
     </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+
+<!-- ===== NAVBAR ===== -->
+<nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container">
-        <a class="navbar-brand" href="/">✂️ Salon Booking</a>
-        <div class="navbar-nav ms-auto">
-            <a class="nav-link" href="/customer/dashboard">Dashboard</a>
-            <a class="nav-link active" href="/my-bookings">My Bookings</a>
-            <a class="nav-link" href="/logout">Logout</a>
+        <a class="navbar-brand" href="/">✂️ Salon<span>Booking</span></a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item">
+                    <a class="nav-link" href="/customer/dashboard">
+                        <i class="bi bi-grid"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="/my-bookings">
+                        <i class="bi bi-calendar-check"></i> My Bookings
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link btn-logout" href="/logout">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </a>
+                </li>
+            </ul>
         </div>
     </div>
 </nav>
 
+<!-- ===== MAIN CONTENT ===== -->
 <div class="container mt-4">
+
     <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>📋 My Bookings</h2>
-        <a href="/customer/book" class="btn btn-primary">
+    <div class="page-header d-flex justify-content-between align-items-center flex-wrap">
+        <h2><i class="bi bi-calendar-check"></i> My Bookings</h2>
+        <a href="/customer/book" class="btn-new-booking">
             <i class="bi bi-plus-circle"></i> New Booking
         </a>
     </div>
 
     <!-- Statistics Cards -->
-    <div class="row mb-4">
-        <div class="col-md-2 col-6">
+    <div class="row stats-row">
+        <div class="col-md-2 col-6 mb-3">
             <div class="stat-card">
+                <span class="stat-icon">📊</span>
                 <div class="stat-number text-primary" th:text="${totalBookings}">0</div>
                 <div class="stat-label">Total</div>
             </div>
         </div>
-        <div class="col-md-2 col-6">
+        <div class="col-md-2 col-6 mb-3">
             <div class="stat-card">
+                <span class="stat-icon">⏳</span>
                 <div class="stat-number text-warning" th:text="${pendingCount}">0</div>
                 <div class="stat-label">Pending</div>
             </div>
         </div>
-        <div class="col-md-2 col-6">
+        <div class="col-md-2 col-6 mb-3">
             <div class="stat-card">
+                <span class="stat-icon">✅</span>
                 <div class="stat-number text-info" th:text="${confirmedCount}">0</div>
                 <div class="stat-label">Confirmed</div>
             </div>
         </div>
-        <div class="col-md-2 col-6">
+        <div class="col-md-2 col-6 mb-3">
             <div class="stat-card">
+                <span class="stat-icon">🎉</span>
                 <div class="stat-number text-success" th:text="${completedCount}">0</div>
                 <div class="stat-label">Completed</div>
             </div>
         </div>
-        <div class="col-md-2 col-6">
+        <div class="col-md-2 col-6 mb-3">
             <div class="stat-card">
+                <span class="stat-icon">❌</span>
                 <div class="stat-number text-danger" th:text="${cancelledCount}">0</div>
                 <div class="stat-label">Cancelled</div>
             </div>
@@ -79,103 +468,96 @@
     </div>
 
     <!-- Filters -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form method="get" action="/my-bookings" class="row g-3 align-items-end">
-                <div class="col-md-4">
-                    <label class="form-label">Status</label>
-                    <select name="status" class="form-select">
-                        <option th:each="s : ${statuses}"
-                                th:value="${s}"
-                                th:text="${s == 'all' ? 'All Bookings' : s}"
-                                th:selected="${s == selectedStatus}">
-                        </option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Date Range</label>
-                    <select name="dateRange" class="form-select">
-                        <option value="all" th:selected="${selectedDateRange == 'all'}">All Time</option>
-                        <option value="today" th:selected="${selectedDateRange == 'today'}">Today</option>
-                        <option value="this-week" th:selected="${selectedDateRange == 'this-week'}">This Week</option>
-                        <option value="this-month" th:selected="${selectedDateRange == 'this-month'}">This Month</option>
-                        <option value="last-month" th:selected="${selectedDateRange == 'last-month'}">Last Month</option>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="bi bi-filter"></i> Apply Filters
-                    </button>
-                </div>
-            </form>
-
-            <!-- Clear Filters -->
-            <div class="mt-2 text-end">
-                <a href="/my-bookings" class="btn btn-sm btn-outline-secondary">
-                    <i class="bi bi-x-circle"></i> Clear All Filters
-                </a>
+    <div class="filter-card">
+        <form method="get" action="/my-bookings" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label><i class="bi bi-funnel"></i> Status</label>
+                <select name="status" class="form-select">
+                    <option th:each="s : ${statuses}"
+                            th:value="${s}"
+                            th:text="${s == 'all' ? 'All Bookings' : s}"
+                            th:selected="${s == selectedStatus}">
+                    </option>
+                </select>
             </div>
-        </div>
+            <div class="col-md-4">
+                <label><i class="bi bi-calendar-range"></i> Date Range</label>
+                <select name="dateRange" class="form-select">
+                    <option value="all" th:selected="${selectedDateRange == 'all'}">All Time</option>
+                    <option value="today" th:selected="${selectedDateRange == 'today'}">Today</option>
+                    <option value="this-week" th:selected="${selectedDateRange == 'this-week'}">This Week</option>
+                    <option value="this-month" th:selected="${selectedDateRange == 'this-month'}">This Month</option>
+                    <option value="last-month" th:selected="${selectedDateRange == 'last-month'}">Last Month</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn-apply">
+                    <i class="bi bi-filter"></i> Apply Filters
+                </button>
+                <div class="text-end mt-2">
+                    <a href="/my-bookings" class="btn-clear">
+                        <i class="bi bi-x-circle"></i> Clear All
+                    </a>
+                </div>
+            </div>
+        </form>
     </div>
 
     <!-- Bookings List -->
     <div th:if="${bookings != null and !bookings.isEmpty()}">
-        <div class="row">
-            <div class="col-12">
-                <p class="text-muted">Showing <strong th:text="${bookings.size()}">0</strong> bookings</p>
-            </div>
+        <div class="mb-3">
+            <span class="text-muted">
+                Showing <strong th:text="${bookings.size()}">0</strong> bookings
+            </span>
         </div>
 
-        <div th:each="booking : ${bookings}" class="row mb-3">
-            <div class="col-12">
-                <div class="card booking-card"
-                     th:classappend="${booking.status == 'pending' ? 'status-pending' :
-                                    booking.status == 'confirmed' ? 'status-confirmed' :
-                                    booking.status == 'completed' ? 'status-completed' :
-                                    booking.status == 'cancelled' ? 'status-cancelled' : ''}">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col-md-3">
-                                <h6 class="mb-1" th:text="${booking.service != null ? booking.service.serviceName : 'N/A'}">Service</h6>
-                                <small class="text-muted">
-                                    <i class="bi bi-calendar3"></i>
-                                    <span th:text="${booking.date}"></span>
-                                    <i class="bi bi-clock ms-2"></i>
-                                    <span th:text="${booking.time}"></span>
-                                </small>
-                            </div>
-                            <div class="col-md-3">
-                                <small class="text-muted">Staff</small>
-                                <div th:text="${booking.staff != null ? booking.staff.staffName : 'TBD'}"></div>
-                                <small class="text-muted">Booking #<span th:text="${booking.id}"></span></small>
-                            </div>
-                            <div class="col-md-2">
-                                <span class="badge"
-                                      th:class="${booking.status == 'pending' ? 'bg-warning text-dark' :
-                                                booking.status == 'confirmed' ? 'bg-info' :
-                                                booking.status == 'completed' ? 'bg-success' :
-                                                'bg-danger'}"
-                                      th:text="${booking.status}">status</span>
-                            </div>
-                            <div class="col-md-4 text-end">
-                                <div class="btn-group" role="group">
-                                    <!-- QR Code Button -->
-                                    <a th:href="@{/qr/view/{id}(id=${booking.id})}"
-                                       class="btn btn-sm btn-info">
-                                        <i class="bi bi-qr-code"></i> QR
-                                    </a>
-                                    <a th:if="${booking.status == 'pending' or booking.status == 'confirmed'}"
-                                       th:href="@{/cancel-booking/{id}(id=${booking.id})}"
-                                       class="btn btn-sm btn-danger"
-                                       onclick="return confirm('Are you sure you want to cancel this booking?')">
-                                        <i class="bi bi-x-circle"></i> Cancel
-                                    </a>
-                                    <a th:href="@{/booking-details/{id}(id=${booking.id})}"
-                                       class="btn btn-sm btn-outline-secondary">
-                                        <i class="bi bi-eye"></i> Details
-                                    </a>
-                                </div>
-                            </div>
+        <div th:each="booking : ${bookings}">
+            <div class="booking-card"
+                 th:classappend="${booking.status == 'pending' ? 'status-pending' :
+                                booking.status == 'confirmed' ? 'status-confirmed' :
+                                booking.status == 'completed' ? 'status-completed' :
+                                booking.status == 'cancelled' ? 'status-cancelled' : ''}">
+                <div class="row align-items-center">
+                    <div class="col-lg-3">
+                        <div class="booking-service" th:text="${booking.service != null ? booking.service.serviceName : 'N/A'}">
+                            Service
+                        </div>
+                        <div class="booking-meta">
+                            <i class="bi bi-calendar3"></i> <span th:text="${booking.date}"></span>
+                            <i class="bi bi-clock ms-2"></i> <span th:text="${booking.time}"></span>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="booking-staff">
+                            <i class="bi bi-person"></i>
+                            <span th:text="${booking.staff != null ? booking.staff.staffName : 'TBD'}">Staff</span>
+                        </div>
+                        <div class="booking-id">Booking #<span th:text="${booking.id}"></span></div>
+                    </div>
+                    <div class="col-lg-2">
+                        <span class="badge-status"
+                              th:class="${booking.status == 'pending' ? 'pending' :
+                                       booking.status == 'confirmed' ? 'confirmed' :
+                                       booking.status == 'completed' ? 'completed' :
+                                       'cancelled'}"
+                              th:text="${booking.status}">status</span>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="btn-group-custom">
+                            <a th:href="@{/qr/view/{id}(id=${booking.id})}"
+                               class="btn btn-qr">
+                                <i class="bi bi-qr-code"></i> QR
+                            </a>
+                            <a th:if="${booking.status == 'pending' or booking.status == 'confirmed'}"
+                               th:href="@{/cancel-booking/{id}(id=${booking.id})}"
+                               class="btn btn-cancel"
+                               onclick="return confirm('Are you sure you want to cancel this booking?')">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                            <a th:href="@{/booking-details/{id}(id=${booking.id})}"
+                               class="btn btn-details">
+                                <i class="bi bi-eye"></i> Details
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -183,11 +565,13 @@
         </div>
     </div>
 
-    <!-- No Bookings Message -->
-    <div th:if="${bookings == null or bookings.isEmpty()}" class="text-center py-5">
-        <i class="bi bi-calendar-x" style="font-size: 48px; color: #ccc;"></i>
-        <h4 class="mt-3">No bookings found</h4>
-        <p class="text-muted">Try adjusting your filters or <a href="/customer/book">book a new appointment</a>.</p>
+    <!-- Empty State -->
+    <div th:if="${bookings == null or bookings.isEmpty()}">
+        <div class="empty-state">
+            <i class="bi bi-calendar-x"></i>
+            <h4>No Bookings Found</h4>
+            <p>You haven't made any bookings yet. <a href="/customer/book">Book your first appointment</a> and experience our premium services.</p>
+        </div>
     </div>
 </div>
 
