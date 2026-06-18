@@ -18,7 +18,6 @@
         .status-confirmed { border-left-color: #17a2b8; }
         .status-completed { border-left-color: #28a745; }
         .status-cancelled { border-left-color: #dc3545; }
-        .filter-active { background-color: #e9ecef; border-radius: 5px; }
         .stat-card { background: white; border-radius: 10px; padding: 15px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .stat-number { font-size: 24px; font-weight: bold; }
         .stat-label { color: #6c757d; font-size: 14px; }
@@ -160,6 +159,11 @@
                             </div>
                             <div class="col-md-4 text-end">
                                 <div class="btn-group" role="group">
+                                    <!-- QR Code Button -->
+                                    <a th:href="@{/qr/view/{id}(id=${booking.id})}"
+                                       class="btn btn-sm btn-info">
+                                        <i class="bi bi-qr-code"></i> QR
+                                    </a>
                                     <a th:if="${booking.status == 'pending' or booking.status == 'confirmed'}"
                                        th:href="@{/cancel-booking/{id}(id=${booking.id})}"
                                        class="btn btn-sm btn-danger"
