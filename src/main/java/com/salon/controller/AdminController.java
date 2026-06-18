@@ -119,12 +119,29 @@ public class AdminController {
 
     @GetMapping("/service/delete/{id}")
     public String deleteService(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        Service service = serviceRepository.findById(id).orElse(null);
+
+        if (service == null) {
+            redirectAttributes.addFlashAttribute("error", "Service not found!");
+            return "redirect:/admin/services";
+        }
+
+        List<Booking> bookings = bookingService.getBookingsByService(service);
+
+        if (!bookings.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error",
+                    "Cannot delete service '" + service.getServiceName() +
+                            "' because it has " + bookings.size() + " existing bookings.");
+            return "redirect:/admin/services";
+        }
+
         try {
             serviceRepository.deleteById(id);
             redirectAttributes.addFlashAttribute("success", "Service deleted successfully!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Failed to delete service: " + e.getMessage());
         }
+
         return "redirect:/admin/services";
     }
 
@@ -181,7 +198,6 @@ public class AdminController {
             return "redirect:/admin/staff";
         }
 
-        // Check if staff has bookings
         List<Booking> bookings = bookingService.getBookingsByStaff(staff);
 
         if (!bookings.isEmpty()) {
@@ -210,7 +226,6 @@ public class AdminController {
             return "redirect:/admin/staff";
         }
 
-        // Get all other staff members (excluding the one to delete)
         List<Staff> availableStaff = staffRepository.findAll().stream()
                 .filter(s -> !s.getId().equals(id))
                 .filter(s -> s.getIsAvailable() != null && s.getIsAvailable())
@@ -244,7 +259,6 @@ public class AdminController {
                 return "redirect:/admin/staff";
             }
 
-            // Reassign bookings
             int count = bookingService.reassignBookings(oldStaffId, newStaffId);
 
             redirectAttributes.addFlashAttribute("success",

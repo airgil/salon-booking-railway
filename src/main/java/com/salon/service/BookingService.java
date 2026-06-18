@@ -44,6 +44,11 @@ public class BookingService {
         return bookingRepository.findByStaff(staff);
     }
 
+    // Get all bookings for a specific service
+    public List<Booking> getBookingsByService(Service service) {
+        return bookingRepository.findByService(service);
+    }
+
 
 
     // NEW: Get bookings with filters
