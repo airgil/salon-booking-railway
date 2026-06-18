@@ -378,6 +378,44 @@
                 </span>
             </div>
         </div>
+
+
+        <!-- Filters -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="get" action="/admin/bookings" class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label"><i class="bi bi-funnel"></i> Status</label>
+                        <select name="status" class="form-select">
+                            <option value="all" th:selected="${selectedStatus == 'all' or selectedStatus == null}">All Status</option>
+                            <option value="pending" th:selected="${selectedStatus == 'pending'}">Pending</option>
+                            <option value="confirmed" th:selected="${selectedStatus == 'confirmed'}">Confirmed</option>
+                            <option value="completed" th:selected="${selectedStatus == 'completed'}">Completed</option>
+                            <option value="cancelled" th:selected="${selectedStatus == 'cancelled'}">Cancelled</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label"><i class="bi bi-calendar3"></i> Date From</label>
+                        <input type="date" name="dateFrom" class="form-control" th:value="${selectedDateFrom}">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label"><i class="bi bi-calendar3"></i> Date To</label>
+                        <input type="date" name="dateTo" class="form-control" th:value="${selectedDateTo}">
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-filter"></i> Apply Filters
+                        </button>
+                    </div>
+                </form>
+                <div class="mt-2 text-end">
+                    <a href="/admin/bookings" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i> Clear Filters
+                    </a>
+                </div>
+            </div>
+        </div>
+
         <div class="card-body">
 
             <div class="table-responsive">

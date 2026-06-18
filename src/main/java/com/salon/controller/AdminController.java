@@ -47,7 +47,10 @@ public class AdminController {
                            @RequestParam(required = false) String dateFrom,
                            @RequestParam(required = false) String dateTo,
                            Model model) {
+        // Get all bookings
         List<Booking> allBookings = bookingService.getAllBookings();
+
+        // Start with all bookings
         List<Booking> filteredBookings = allBookings;
 
         // Apply status filter
@@ -61,7 +64,7 @@ public class AdminController {
         if (dateFrom != null && !dateFrom.isEmpty()) {
             LocalDate fromDate = LocalDate.parse(dateFrom);
             filteredBookings = filteredBookings.stream()
-                    .filter(b -> b.getDate().isAfter(fromDate.minusDays(1)))
+                    .filter(b -> b.getDate() != null && !b.getDate().isBefore(fromDate))
                     .collect(Collectors.toList());
         }
 
@@ -69,11 +72,11 @@ public class AdminController {
         if (dateTo != null && !dateTo.isEmpty()) {
             LocalDate toDate = LocalDate.parse(dateTo);
             filteredBookings = filteredBookings.stream()
-                    .filter(b -> b.getDate().isBefore(toDate.plusDays(1)))
+                    .filter(b -> b.getDate() != null && !b.getDate().isAfter(toDate))
                     .collect(Collectors.toList());
         }
 
-        // Calculate statistics from all bookings (not filtered)
+        // Calculate statistics from filtered bookings
         int totalBookings = allBookings.size();
         int pendingCount = (int) allBookings.stream()
                 .filter(b -> "pending".equals(b.getStatus()))
@@ -88,13 +91,16 @@ public class AdminController {
                 .filter(b -> "cancelled".equals(b.getStatus()))
                 .count();
 
+        // Add attributes to model
         model.addAttribute("bookings", filteredBookings);
         model.addAttribute("totalBookings", totalBookings);
         model.addAttribute("pendingCount", pendingCount);
         model.addAttribute("confirmedCount", confirmedCount);
         model.addAttribute("completedCount", completedCount);
         model.addAttribute("cancelledCount", cancelledCount);
-        model.addAttribute("selectedStatus", status);
+
+        // These are the critical values for the filter form
+        model.addAttribute("selectedStatus", status != null ? status : "all");
         model.addAttribute("selectedDateFrom", dateFrom);
         model.addAttribute("selectedDateTo", dateTo);
 
