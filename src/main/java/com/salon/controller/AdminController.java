@@ -90,10 +90,27 @@ public class AdminController {
 
     @GetMapping("/reports")
     public String reports(Model model) {
-        // Add any data you want to show
+        // Get all bookings
         List<Booking> bookings = bookingService.getAllBookings();
-        model.addAttribute("totalBookings", bookings.size());
-        model.addAttribute("bookings", bookings);
+
+        // Calculate statistics
+        int totalBookings = bookings.size();
+        int completedCount = (int) bookings.stream()
+                .filter(b -> "completed".equals(b.getStatus()))
+                .count();
+        int pendingCount = (int) bookings.stream()
+                .filter(b -> "pending".equals(b.getStatus()))
+                .count();
+        int cancelledCount = (int) bookings.stream()
+                .filter(b -> "cancelled".equals(b.getStatus()))
+                .count();
+
+        // Add to model
+        model.addAttribute("totalBookings", totalBookings);
+        model.addAttribute("completedCount", completedCount);
+        model.addAttribute("pendingCount", pendingCount);
+        model.addAttribute("cancelledCount", cancelledCount);
+
         return "admin/reports";
     }
 }
